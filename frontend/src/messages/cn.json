@@ -717,6 +717,10 @@
     "stepSelect": "① 选择股票",
     "stepRisk": "② 风险参数",
     "stepResult": "③ 预算结果",
+    "marketContext": "Market Context",
+    "riskModelInputs": "Risk Model Inputs",
+    "liveResult": "Live Result",
+    "smartVerdict": "Smart Verdict",
     "clear": "清除",
     "rePrefill": "重新预填",
     "searchPlaceholder": "代码 / 名称 / 拼音首字母（如 600519、贵州茅台、GZMT）",
@@ -733,6 +737,10 @@
     "fieldEntryHint": "计划买入价格",
     "fieldTarget": "目标价（可选）",
     "fieldTargetHint": "用于推导 R 倍数；未填则不计算",
+    "advancedHeading": "Advanced",
+    "advancedHint": "目标价等专业参数默认收起",
+    "expand": "展开",
+    "collapse": "收起",
     "stopModeHeading": "止损方式",
     "fieldStopPct": "百分比止损（%）",
     "fieldSystemStop": "系统止损位",
@@ -744,20 +752,29 @@
     "resultRisk1R": "1R 风险金额",
     "resultRiskPerShare": "每股风险",
     "resultShares": "建议股数",
+    "resultPositionSize": "Position Size",
     "resultExpectedLoss": "预计亏损",
+    "resultPositionValue": "仓位市值",
+    "resultExposure": "账户暴露",
     "resultStop": "止损价",
     "resultRMultiple": "R 倍数",
+    "sharesUnit": "Shares",
+    "maxLossShort": "Max Loss",
     "recentHeading": "最近预算",
     "recentHint": "保存后的计划快照会出现在这里，可载入旧参数继续测算。",
+    "recentSnapshots": "Recent Snapshots",
+    "recentSnapshotsHint": "保存后的风险预算快照会出现在这里，可一键载入复用。",
     "recentRefresh": "刷新",
     "recentLoading": "正在加载最近预算...",
     "recentEmpty": "暂无预算快照。完成一次保存后，这里会显示最近记录。",
     "loadSnapshot": "载入为当前参数",
     "snapshotLoaded": "已载入历史预算参数；保存时会生成新的快照",
     "noticeHeading": "注意",
+    "fieldAlerts": "字段提示",
+    "stickyResult": "Result Summary",
     "disclaimer": "本工具为风险预算辅助工具，所有计算结果基于您输入的数据与系统参数。不构成投资建议，不保证盈利。市场有风险，投资需谨慎。",
     "saveBusy": "保存中...",
-    "saveCta": "保存偏好与预算快照",
+    "saveCta": "Save Snapshot",
     "errLoadStockProfile": "加载股票档案失败，请稍后重试",
     "infoNoTactical": "该股票暂无可用的战术档案，请手动填入入场价与止损位",
     "successPrefilled": "已根据战术档案完成预填，请确认参数",
@@ -797,6 +814,38 @@
     },
     "budgetWarnings": {
       "riskRatioHigh": "风险比例高于 2%"
+    },
+    "verdictStatus": {
+      "VALID": "VALID",
+      "WARNING": "WARNING",
+      "INVALID": "INVALID",
+      "INCOMPLETE": "INCOMPLETE"
+    },
+    "verdictTitle": {
+      "VALID": "Valid Setup",
+      "WARNING": "Check Setup",
+      "INVALID": "Invalid Setup",
+      "INCOMPLETE": "Incomplete Setup"
+    },
+    "verdictSummary": {
+      "VALID": "Risk is within your plan.",
+      "WARNING": "Risk is acceptable, but one discipline check needs attention.",
+      "INVALID": "Stop price or risk model needs correction.",
+      "INCOMPLETE": "Complete required fields to calculate position size."
+    },
+    "verdictChecks": {
+      "required_fields": "必填字段完整",
+      "risk_cap": "风险比例符合上限",
+      "stop_distance": "止损距离有效",
+      "position_size": "仓位数量有效",
+      "exposure": "账户暴露可接受",
+      "r_multiple": "R ≥ 2"
+    },
+    "checkStatus": {
+      "PASS": "PASS",
+      "WARN": "WARN",
+      "FAIL": "FAIL",
+      "PENDING": "PENDING"
     }
   }
 }

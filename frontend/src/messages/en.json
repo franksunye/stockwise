@@ -717,6 +717,10 @@
     "stepSelect": "① SELECT SYMBOL",
     "stepRisk": "② RISK INPUTS",
     "stepResult": "③ RESULT",
+    "marketContext": "Market Context",
+    "riskModelInputs": "Risk Model Inputs",
+    "liveResult": "Live Result",
+    "smartVerdict": "Smart Verdict",
     "clear": "Clear",
     "rePrefill": "Re-fill",
     "searchPlaceholder": "Symbol, name, or pinyin (e.g. 600519, Moutai, GZMT)",
@@ -733,6 +737,10 @@
     "fieldEntryHint": "Planned buy price",
     "fieldTarget": "Target (optional)",
     "fieldTargetHint": "Used for R-multiple; leave blank to skip",
+    "advancedHeading": "Advanced",
+    "advancedHint": "Target price and pro parameters stay out of the main flow",
+    "expand": "Expand",
+    "collapse": "Collapse",
     "stopModeHeading": "Stop style",
     "fieldStopPct": "Stop distance (%)",
     "fieldSystemStop": "System stop",
@@ -744,20 +752,29 @@
     "resultRisk1R": "1R risk ($)",
     "resultRiskPerShare": "Risk / share",
     "resultShares": "Shares (floor)",
+    "resultPositionSize": "Position Size",
     "resultExpectedLoss": "Expected loss",
+    "resultPositionValue": "Position Value",
+    "resultExposure": "Exposure",
     "resultStop": "Stop price",
     "resultRMultiple": "R-multiple",
+    "sharesUnit": "Shares",
+    "maxLossShort": "Max Loss",
     "recentHeading": "Recent budgets",
     "recentHint": "Saved plan snapshots appear here. Load an old plan to continue calculating.",
+    "recentSnapshots": "Recent Snapshots",
+    "recentSnapshotsHint": "Saved risk budget snapshots appear here. Load one to reuse its parameters.",
     "recentRefresh": "Refresh",
     "recentLoading": "Loading recent budgets...",
     "recentEmpty": "No budget snapshots yet. Save once to see recent records here.",
     "loadSnapshot": "Load as current parameters",
     "snapshotLoaded": "Loaded historical budget parameters; saving will create a new snapshot",
     "noticeHeading": "Note",
+    "fieldAlerts": "Field alerts",
+    "stickyResult": "Result Summary",
     "disclaimer": "This tool estimates risk budget only. Results depend on your inputs and system parameters. Not investment advice. Markets involve risk.",
     "saveBusy": "Saving...",
-    "saveCta": "Save prefs & snapshot",
+    "saveCta": "Save Snapshot",
     "errLoadStockProfile": "Could not load stock profile. Try again.",
     "infoNoTactical": "No tactical profile for this symbol. Enter entry and stop manually.",
     "successPrefilled": "Filled from profile—please verify inputs",
@@ -797,6 +814,38 @@
     },
     "budgetWarnings": {
       "riskRatioHigh": "Risk ratio is above 2%"
+    },
+    "verdictStatus": {
+      "VALID": "VALID",
+      "WARNING": "WARNING",
+      "INVALID": "INVALID",
+      "INCOMPLETE": "INCOMPLETE"
+    },
+    "verdictTitle": {
+      "VALID": "Valid Setup",
+      "WARNING": "Check Setup",
+      "INVALID": "Invalid Setup",
+      "INCOMPLETE": "Incomplete Setup"
+    },
+    "verdictSummary": {
+      "VALID": "Risk is within your plan.",
+      "WARNING": "Risk is acceptable, but one discipline check needs attention.",
+      "INVALID": "Stop price or risk model needs correction.",
+      "INCOMPLETE": "Complete required fields to calculate position size."
+    },
+    "verdictChecks": {
+      "required_fields": "Required fields complete",
+      "risk_cap": "Risk within cap",
+      "stop_distance": "Stop distance valid",
+      "position_size": "Position size valid",
+      "exposure": "Exposure acceptable",
+      "r_multiple": "R ≥ 2"
+    },
+    "checkStatus": {
+      "PASS": "PASS",
+      "WARN": "WARN",
+      "FAIL": "FAIL",
+      "PENDING": "PENDING"
     }
   }
 }

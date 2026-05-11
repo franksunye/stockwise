@@ -20,8 +20,26 @@ export interface PositionBudgetOutput {
   riskPerShare: number;
   positionSize: number;
   expectedLoss: number;
+  positionValue: number;
+  accountExposurePercent: number;
   expectedProfit: number | null;
   rMultiple: number | null;
+}
+
+export type PositionBudgetVerdictStatus = 'VALID' | 'WARNING' | 'INVALID' | 'INCOMPLETE';
+
+export interface PositionBudgetVerdictCheck {
+  key: 'required_fields' | 'risk_cap' | 'stop_distance' | 'position_size' | 'exposure' | 'r_multiple';
+  label: string;
+  status: 'PASS' | 'WARN' | 'FAIL' | 'PENDING';
+}
+
+export interface PositionBudgetVerdict {
+  status: PositionBudgetVerdictStatus;
+  grade: 'A' | 'B+' | 'C' | '—';
+  title: string;
+  summary: string;
+  checks: PositionBudgetVerdictCheck[];
 }
 
 const RISK_RATIO_WARN = 0.02;
@@ -29,6 +47,17 @@ const RISK_RATIO_MAX = 0.05;
 const RISK_RATIO_MIN = 0.001;
 const STOP_PERCENT_MIN = 0.01;
 const STOP_PERCENT_MAX = 0.1;
+const EXPOSURE_WARN_PERCENT = 30;
+const EXPOSURE_INVALID_PERCENT = 100;
+const R_MULTIPLE_WARN = 2;
+
+const INCOMPLETE_ERRORS = new Set([
+  'Invalid account size',
+  'Invalid risk ratio',
+  'Invalid entry price',
+  'Missing stop percent',
+  'Invalid stop loss price',
+]);
 
 export function isValidPositionBudgetSymbol(input: string): boolean {
   return /^[A-Z0-9][A-Z0-9.-]{0,15}$/.test(input);
@@ -96,6 +125,8 @@ export function computePositionBudget(input: PositionBudgetInput): PositionBudge
       riskPerShare: 0,
       positionSize: 0,
       expectedLoss: 0,
+      positionValue: 0,
+      accountExposurePercent: 0,
       expectedProfit: null,
       rMultiple: null,
     };
@@ -109,12 +140,13 @@ export function computePositionBudget(input: PositionBudgetInput): PositionBudge
   const riskAmount = accountSize * riskRatio;
   const positionSize = riskPerShare > 0 ? Math.floor(riskAmount / riskPerShare) : 0;
   const expectedLoss = positionSize * riskPerShare;
-  const notional = positionSize * entryPrice;
+  const positionValue = positionSize * entryPrice;
+  const accountExposurePercent = accountSize > 0 ? (positionValue / accountSize) * 100 : 0;
 
   if (positionSize <= 0) {
     errors.push('Position size is zero under current parameters');
   }
-  if (notional > accountSize) {
+  if (positionValue > accountSize) {
     errors.push('Position notional exceeds account size');
   }
 
@@ -134,7 +166,108 @@ export function computePositionBudget(input: PositionBudgetInput): PositionBudge
     riskPerShare: roundMoney(riskPerShare),
     positionSize,
     expectedLoss: roundMoney(expectedLoss),
+    positionValue: roundMoney(positionValue),
+    accountExposurePercent: Number(accountExposurePercent.toFixed(2)),
     expectedProfit: expectedProfit === null ? null : roundMoney(expectedProfit),
     rMultiple: rMultiple === null ? null : Number(rMultiple.toFixed(4)),
+  };
+}
+
+function hasIncompleteError(errors: string[]): boolean {
+  return errors.some((error) => INCOMPLETE_ERRORS.has(error));
+}
+
+function checkKeyForError(error: string): PositionBudgetVerdictCheck['key'] {
+  if (error === 'Position size is zero under current parameters') return 'position_size';
+  if (error === 'Position notional exceeds account size') return 'exposure';
+  return 'stop_distance';
+}
+
+export function buildPositionBudgetVerdict(output: PositionBudgetOutput): PositionBudgetVerdict {
+  if (hasIncompleteError(output.errors)) {
+    return {
+      status: 'INCOMPLETE',
+      grade: '—',
+      title: 'Incomplete Setup',
+      summary: 'Complete required fields to calculate position size.',
+      checks: [
+        {
+          key: 'required_fields',
+          label: 'Required fields complete',
+          status: 'PENDING',
+        },
+      ],
+    };
+  }
+
+  if (!output.ok) {
+    return {
+      status: 'INVALID',
+      grade: '—',
+      title: 'Invalid Setup',
+      summary: 'Stop price or risk model needs correction.',
+      checks: output.errors.slice(0, 3).map((error) => ({
+        key: checkKeyForError(error),
+        label: error,
+        status: 'FAIL',
+      })),
+    };
+  }
+
+  const riskWarning = output.warnings.length > 0;
+  const exposureWarning = output.accountExposurePercent > EXPOSURE_WARN_PERCENT;
+  const exposureInvalid = output.accountExposurePercent > EXPOSURE_INVALID_PERCENT;
+  const rMultipleWarning = output.rMultiple !== null && output.rMultiple < R_MULTIPLE_WARN;
+
+  const checks: PositionBudgetVerdictCheck[] = [
+    {
+      key: 'risk_cap',
+      label: 'Risk within cap',
+      status: riskWarning ? 'WARN' : 'PASS',
+    },
+    {
+      key: 'exposure',
+      label: 'Exposure acceptable',
+      status: exposureInvalid ? 'FAIL' : exposureWarning ? 'WARN' : 'PASS',
+    },
+  ];
+
+  if (output.rMultiple !== null) {
+    checks.push({
+      key: 'r_multiple',
+      label: 'R >= 2',
+      status: rMultipleWarning ? 'WARN' : 'PASS',
+    });
+  }
+
+  const status: PositionBudgetVerdictStatus =
+    exposureInvalid ? 'INVALID' : riskWarning || exposureWarning || rMultipleWarning ? 'WARNING' : 'VALID';
+
+  if (status === 'INVALID') {
+    return {
+      status,
+      grade: 'C',
+      title: 'Invalid Setup',
+      summary: 'Exposure exceeds the account budget.',
+      checks: checks.slice(0, 3),
+    };
+  }
+
+  if (status === 'WARNING') {
+    return {
+      status,
+      grade: 'B+',
+      title: 'Check Setup',
+      summary: 'Risk is acceptable, but one discipline check needs attention.',
+      checks: checks.slice(0, 3),
+    };
+  }
+
+  return {
+    status: 'VALID',
+    grade: 'A',
+    title: 'Valid Setup',
+    summary: 'Risk is within your plan.',
+    checks: checks.slice(0, 3),
   };
 }

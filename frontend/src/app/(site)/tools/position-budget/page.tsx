@@ -4,18 +4,21 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
     AlertCircle,
-    AlertTriangle,
     ArrowLeft,
     Calculator,
     CheckCircle2,
     Loader2,
     RefreshCcw,
-    Target,
     Wand2,
     X,
 } from 'lucide-react';
 
-import { computePositionBudget, type PositionBudgetRMode } from '@/lib/position-budget';
+import {
+    buildPositionBudgetVerdict,
+    computePositionBudget,
+    type PositionBudgetRMode,
+    type PositionBudgetVerdictStatus,
+} from '@/lib/position-budget';
 import { parseTacticalData } from '@/lib/tactical-brief-content';
 import { getCurrentUser } from '@/lib/user';
 import { useGlobalT, useLocale, useT } from '@/context/LocaleContext';
@@ -27,10 +30,12 @@ import { StockSymbolSearchField } from '@/components/stock/StockSymbolSearchFiel
 import { useStockSymbolSearch } from '@/hooks/useStockSymbolSearch';
 import {
     fetchPositionBudgetPreferences,
+    fetchPositionBudgetPriceHistory,
     fetchPositionBudgetSnapshots,
     fetchPositionBudgetStockIdentity,
     savePositionBudgetPreferences,
     savePositionBudgetSnapshot,
+    type PositionBudgetPricePoint,
     type PositionBudgetSnapshot,
 } from '@/lib/position-budget-client';
 
@@ -85,10 +90,54 @@ function fmtDate(value: string | null | undefined, appLocale: AppLocale): string
     });
 }
 
+function fmtRelativeTime(value: string | null | undefined, appLocale: AppLocale): string {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return fmtDate(value, appLocale);
+    const diffMs = Date.now() - date.getTime();
+    const absMs = Math.abs(diffMs);
+    const rtf = new Intl.RelativeTimeFormat(appLocale === 'en' ? 'en-US' : 'zh-CN', {
+        numeric: 'auto',
+        style: 'short',
+    });
+    const units: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+        ['year', 1000 * 60 * 60 * 24 * 365],
+        ['month', 1000 * 60 * 60 * 24 * 30],
+        ['day', 1000 * 60 * 60 * 24],
+        ['hour', 1000 * 60 * 60],
+        ['minute', 1000 * 60],
+    ];
+    for (const [unit, unitMs] of units) {
+        if (absMs >= unitMs) {
+            return rtf.format(Math.round(-diffMs / unitMs), unit);
+        }
+    }
+    return rtf.format(0, 'minute');
+}
+
 function snapshotRMultiple(snapshot: PositionBudgetSnapshot): number | null {
     if (snapshot.target_price == null || snapshot.risk_per_share <= 0) return null;
     const multiple = (snapshot.target_price - snapshot.entry_price) / snapshot.risk_per_share;
     return Number.isFinite(multiple) ? multiple : null;
+}
+
+function snapshotPositionValue(snapshot: PositionBudgetSnapshot): number {
+    return snapshot.position_size * snapshot.entry_price;
+}
+
+function snapshotExposurePercent(snapshot: PositionBudgetSnapshot): number {
+    if (snapshot.account_size <= 0) return 0;
+    return (snapshotPositionValue(snapshot) / snapshot.account_size) * 100;
+}
+
+function snapshotStatusTone(snapshot: PositionBudgetSnapshot): 'valid' | 'warning' | 'invalid' {
+    const exposure = snapshotExposurePercent(snapshot);
+    const multiple = snapshotRMultiple(snapshot);
+    if (exposure > 100 || snapshot.position_size <= 0) return 'invalid';
+    if (exposure > 30 || (multiple !== null && multiple < 2) || snapshot.risk_ratio > 0.02) {
+        return 'warning';
+    }
+    return 'valid';
 }
 
 const BUDGET_ERROR_KEYS: Record<string, MessageKey<'positionBudget'>> = {
@@ -133,6 +182,8 @@ export default function PositionBudgetToolPage() {
     const [banner, setBanner] = useState<Banner | null>(null);
     const [snapshots, setSnapshots] = useState<PositionBudgetSnapshot[]>([]);
     const [loadingSnapshots, setLoadingSnapshots] = useState(false);
+    const [priceHistory, setPriceHistory] = useState<PositionBudgetPricePoint[]>([]);
+    const [loadingPriceHistory, setLoadingPriceHistory] = useState(false);
 
     const [selected, setSelected] = useState<SelectedStock | null>(null);
 
@@ -144,8 +195,10 @@ export default function PositionBudgetToolPage() {
     const [riskRatioPercent, setRiskRatioPercent] = useState('1');
     const [stopPercent, setStopPercent] = useState('5');
     const [rMode, setRMode] = useState<PositionBudgetRMode>('system_followed');
+    const [advancedOpen, setAdvancedOpen] = useState(false);
     const prefillAbortRef = useRef<AbortController | null>(null);
     const prefillSeqRef = useRef(0);
+    const priceHistorySeqRef = useRef(0);
 
     const { watchlist, loading: watchlistLoading } = useWatchlist();
 
@@ -201,6 +254,33 @@ export default function PositionBudgetToolPage() {
         const t = setTimeout(() => setBanner(null), banner.tone === 'error' ? 4000 : 3000);
         return () => clearTimeout(t);
     }, [banner]);
+
+    useEffect(() => {
+        const symbol = selected?.symbol;
+        if (!symbol) {
+            setPriceHistory([]);
+            setLoadingPriceHistory(false);
+            return;
+        }
+        const requestSeq = priceHistorySeqRef.current + 1;
+        priceHistorySeqRef.current = requestSeq;
+        setLoadingPriceHistory(true);
+        void fetchPositionBudgetPriceHistory(symbol, 30)
+            .then((rows) => {
+                if (requestSeq !== priceHistorySeqRef.current) return;
+                setPriceHistory(rows);
+            })
+            .catch((error) => {
+                if (requestSeq !== priceHistorySeqRef.current) return;
+                console.warn('Price history fetch failed:', error);
+                setPriceHistory([]);
+            })
+            .finally(() => {
+                if (requestSeq === priceHistorySeqRef.current) {
+                    setLoadingPriceHistory(false);
+                }
+            });
+    }, [selected?.symbol]);
 
     const budget = useMemo(() => {
         const riskRatio = Number(riskRatioPercent) / 100;
@@ -441,6 +521,8 @@ export default function PositionBudgetToolPage() {
     const selectedBadge = selected ? getMarketBadge(selected.market, 'compact', locale) : null;
     const stopInputValue = rMode === 'system_followed' ? systemStopLossPrice : fixedStopLossPrice;
     const canSave = bootstrapped && !!selected && budget.ok && !saving;
+    const verdict = useMemo(() => buildPositionBudgetVerdict(budget), [budget]);
+    const stickyRMultiple = budget.rMultiple === null ? '—' : `${fmt(budget.rMultiple, 2, locale)}R`;
 
     return (
         <div className="min-h-[100dvh] bg-[#050508] text-white font-sans">
@@ -496,7 +578,7 @@ export default function PositionBudgetToolPage() {
                 </div>
             </header>
 
-            <main className="relative mx-auto max-w-4xl px-6 py-8 space-y-6 pb-32">
+            <main className="relative mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8 space-y-6 pb-36">
                 {/* Banner */}
                 {banner ? (
                     <div
@@ -521,11 +603,11 @@ export default function PositionBudgetToolPage() {
                     </div>
                 ) : null}
 
-                {/* Stock picker section */}
+                {/* Market Context */}
                 <section className="glass-card">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-                            {t('stepSelect')}
+                            {t('marketContext')}
                         </h2>
                         {selected ? (
                             <button
@@ -553,33 +635,30 @@ export default function PositionBudgetToolPage() {
                                     {selectedBadge?.label}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-base font-black italic tracking-tighter text-white truncate">
-                                        {selectedDisplayName}
-                                    </p>
-                                    <p className="text-[10px] text-slate-500 mono uppercase tracking-widest mt-0.5">
+                                    <p className="text-lg sm:text-xl font-black italic tracking-tighter text-white truncate">
                                         {selected.symbol}
-                                        {selectedBadge?.suffix}
+                                        <span className="ml-2 text-xs not-italic tracking-normal text-slate-500">
+                                            {selectedDisplayName === selected.symbol ? '' : selectedDisplayName}
+                                        </span>
+                                    </p>
+                                    <p className="text-[10px] text-slate-500 mono uppercase tracking-widest mt-0.5 flex flex-wrap items-center gap-2">
+                                        <span>{selectedBadge?.suffix || selected.market || 'MARKET'}</span>
                                         {selected.lastClose ? (
-                                            <span className="ml-2 text-slate-400">
-                                                · {t('selectedClose')}{' '}
+                                            <span className="text-slate-400">
+                                                {t('selectedClose')}{' '}
                                                 {fmt(selected.lastClose, 2, locale)}
                                             </span>
                                         ) : null}
+                                        <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-emerald-300">
+                                            LONG
+                                        </span>
                                     </p>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => void runPrefill(selected)}
-                                disabled={loadingPrefill}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 active:scale-95 transition-all disabled:opacity-50"
-                            >
-                                {loadingPrefill ? (
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
-                                ) : (
-                                    <RefreshCcw className="w-3.5 h-3.5 text-indigo-400" />
-                                )}
-                                {t('rePrefill')}
-                            </button>
+                            <MiniTrendSparkline
+                                loading={loadingPrefill || loadingPriceHistory}
+                                points={priceHistory}
+                            />
                         </div>
                     ) : (
                         <>
@@ -652,115 +731,130 @@ export default function PositionBudgetToolPage() {
                     )}
                 </section>
 
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(380px,1.05fr)] lg:items-start">
                 {/* Parameters section */}
-                <section className="glass-card">
-                    <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4">
-                        {t('stepRisk')}
-                    </h2>
+                <section className="glass-card !p-4 sm:!p-5 lg:sticky lg:top-28">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                            {t('riskModelInputs')}
+                        </h2>
+                        <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                            LONG
+                        </span>
+                    </div>
 
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                         <FieldNumber
                             label={t('fieldAccountSize')}
                             value={accountSize}
                             onChange={setAccountSize}
                             placeholder="100000"
-                            hint={t('fieldAccountSizeHint')}
                         />
                         <FieldNumber
                             label={t('fieldRiskPct')}
                             value={riskRatioPercent}
                             onChange={setRiskRatioPercent}
                             placeholder="1"
-                            hint={t('fieldRiskPctHint')}
                         />
                         <FieldNumber
                             label={t('fieldEntry')}
                             value={entryPrice}
                             onChange={setEntryPrice}
                             placeholder="0.00"
-                            hint={t('fieldEntryHint')}
                         />
-                        <FieldNumber
-                            label={t('fieldTarget')}
-                            value={targetPrice}
-                            onChange={setTargetPrice}
-                            placeholder="0.00"
-                            hint={t('fieldTargetHint')}
-                        />
+                        {rMode === 'percent_stop' ? (
+                            <FieldNumber
+                                label={t('fieldStopPct')}
+                                value={stopPercent}
+                                onChange={setStopPercent}
+                                placeholder="5"
+                            />
+                        ) : (
+                            <FieldNumber
+                                label={stopInputLabel}
+                                value={stopInputValue}
+                                onChange={(v) =>
+                                    rMode === 'system_followed'
+                                        ? setSystemStopLossPrice(v)
+                                        : setFixedStopLossPrice(v)
+                                }
+                                placeholder="0.00"
+                            />
+                        )}
                     </div>
 
                     {/* R mode segmented control */}
-                    <div className="mt-5">
+                    <div className="mt-3">
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">
                             {t('stopModeHeading')}
                         </p>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid grid-cols-3 gap-2 rounded-2xl border border-white/5 bg-black/20 p-1">
                             {rModeOptions.map((opt) => {
                                 const active = rMode === opt.value;
                                 return (
                                     <button
                                         key={opt.value}
                                         onClick={() => setRMode(opt.value)}
-                                        className={`flex-1 min-w-[120px] px-4 py-3 rounded-2xl border transition-all active:scale-95 text-left ${
+                                        title={opt.hint}
+                                        className={`min-w-0 px-2.5 py-2 rounded-xl border transition-all active:scale-95 text-center ${
                                             active
-                                                ? 'bg-indigo-500/15 border-indigo-500/40'
-                                                : 'bg-white/5 border-white/5 hover:bg-white/10'
+                                                ? 'bg-indigo-500/15 border-indigo-500/40 shadow-[0_0_18px_rgba(99,102,241,0.12)]'
+                                                : 'bg-transparent border-transparent hover:bg-white/5'
                                         }`}
                                     >
                                         <p
-                                            className={`text-xs font-black uppercase tracking-widest ${active ? 'text-indigo-300' : 'text-slate-300'}`}
+                                            className={`truncate text-[10px] sm:text-xs font-black uppercase tracking-widest ${active ? 'text-indigo-300' : 'text-slate-400'}`}
                                         >
                                             {opt.label}
-                                        </p>
-                                        <p className="text-[10px] text-slate-500 mt-1 font-medium leading-tight">
-                                            {opt.hint}
                                         </p>
                                     </button>
                                 );
                             })}
                         </div>
 
-                        <div className="mt-4">
-                            {rMode === 'percent_stop' ? (
-                                <FieldNumber
-                                    label={t('fieldStopPct')}
-                                    value={stopPercent}
-                                    onChange={setStopPercent}
-                                    placeholder="5"
-                                />
-                            ) : (
-                                <FieldNumber
-                                    label={stopInputLabel}
-                                    value={stopInputValue}
-                                    onChange={(v) =>
-                                        rMode === 'system_followed'
-                                            ? setSystemStopLossPrice(v)
-                                            : setFixedStopLossPrice(v)
-                                    }
-                                    placeholder="0.00"
-                                />
-                            )}
+                        <div className="mt-3 rounded-2xl border border-white/5 bg-black/20">
+                            <button
+                                type="button"
+                                onClick={() => setAdvancedOpen((next) => !next)}
+                                className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left"
+                            >
+                                <span>
+                                    <span className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                                        {t('advancedHeading')}
+                                    </span>
+                                    <span className="mt-0.5 hidden sm:block text-[10px] text-slate-600">
+                                        {t('advancedHint')}
+                                    </span>
+                                </span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">
+                                    {advancedOpen ? t('collapse') : t('expand')}
+                                </span>
+                            </button>
+                            {advancedOpen ? (
+                                <div className="border-t border-white/5 p-3">
+                                    <FieldNumber
+                                        label={t('fieldTarget')}
+                                        value={targetPrice}
+                                        onChange={setTargetPrice}
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                            ) : null}
                         </div>
                     </div>
                 </section>
 
                 {/* Result section */}
-                <section className="glass-card">
+                <section className="glass-card border-indigo-500/20 bg-indigo-500/[0.03]">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-                            {t('stepResult')}
+                            {t('liveResult')}
                         </h2>
                         <div
-                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${
-                                budget.ok
-                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                                    : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
-                            }`}
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${verdictPillClass(verdict.status)}`}
                         >
-                            <span
-                                className={`w-1 h-1 rounded-full ${budget.ok ? 'bg-emerald-400' : 'bg-rose-400'}`}
-                            />
-                            {budget.ok ? t('statusOk') : t('statusIncomplete')}
+                            <span className="w-1 h-1 rounded-full bg-current" />
+                            {t(`verdictStatus.${verdict.status}` as MessageKey<'positionBudget'>)}
                         </div>
                     </div>
 
@@ -768,80 +862,95 @@ export default function PositionBudgetToolPage() {
                         <p className="text-xs text-slate-500 font-medium">{t('loadingPreferences')}</p>
                     ) : null}
 
-                    {budget.errors.length > 0 ? (
-                        <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <AlertCircle className="w-4 h-4 text-rose-400" />
-                                <p className="text-[10px] font-black uppercase tracking-widest text-rose-300">
-                                    {t('paramsIncomplete')}
-                                </p>
-                            </div>
-                            <ul className="space-y-1 pl-1 text-sm text-rose-200">
-                                {budget.errors.map((error) => (
-                                    <li key={error} className="leading-relaxed">
-                                        ·{' '}
-                                        {BUDGET_ERROR_KEYS[error]
-                                            ? t(BUDGET_ERROR_KEYS[error])
-                                            : error}
-                                    </li>
-                                ))}
-                            </ul>
+                    <div className="rounded-[28px] border border-white/10 bg-black/30 p-5 sm:p-6">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                            {t('resultPositionSize')}
+                        </p>
+                        <div className="mt-2 flex items-end gap-2">
+                            <p className="text-5xl sm:text-6xl font-black mono tracking-tighter text-white">
+                                {fmt(budget.positionSize, 0, locale)}
+                            </p>
+                            <p className="pb-2 text-sm font-black uppercase tracking-widest text-slate-500">
+                                {t('sharesUnit')}
+                            </p>
                         </div>
-                    ) : (
-                        <div className="grid gap-3 md:grid-cols-2">
-                            <ResultCell
-                                icon={<Target className="w-3.5 h-3.5" />}
-                                label={t('resultRisk1R')}
-                                value={fmt(budget.riskAmount, 2, locale)}
-                                tone="primary"
-                            />
-                            <ResultCell
-                                label={t('resultRiskPerShare')}
-                                value={fmt(budget.riskPerShare, 4, locale)}
-                            />
-                            <ResultCell
-                                label={t('resultShares')}
-                                value={fmt(budget.positionSize, 0, locale)}
-                                tone="primary"
-                            />
+
+                        <div className="mt-5 grid grid-cols-2 gap-3">
                             <ResultCell
                                 label={t('resultExpectedLoss')}
                                 value={fmt(budget.expectedLoss, 2, locale)}
-                                tone="warning"
+                                tone="risk"
                             />
                             <ResultCell
-                                label={t('resultStop')}
-                                value={fmt(budget.resolvedStopLossPrice, 4, locale)}
+                                label={t('resultExposure')}
+                                value={`${fmt(budget.accountExposurePercent, 2, locale)}%`}
+                                tone={budget.accountExposurePercent > 30 ? 'warning' : 'primary'}
+                            />
+                            <ResultCell
+                                label={t('resultPositionValue')}
+                                value={fmt(budget.positionValue, 2, locale)}
                             />
                             <ResultCell
                                 label={t('resultRMultiple')}
-                                value={
-                                    budget.rMultiple === null
-                                        ? '—'
-                                        : `${fmt(budget.rMultiple, 2, locale)}R`
-                                }
+                                value={stickyRMultiple}
+                                tone="primary"
                             />
                         </div>
-                    )}
+                    </div>
 
-                    {budget.warnings.length > 0 ? (
-                        <div className="mt-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <AlertTriangle className="w-4 h-4 text-amber-400" />
-                                <p className="text-[10px] font-black uppercase tracking-widest text-amber-300">
-                                    {t('noticeHeading')}
+                    <div className={`mt-4 rounded-[24px] border p-4 ${verdictCardClass(verdict.status)}`}>
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70">
+                                    {t('smartVerdict')}
+                                </p>
+                                <h3 className="mt-2 text-lg font-black tracking-tight">
+                                    {t(`verdictTitle.${verdict.status}` as MessageKey<'positionBudget'>)}
+                                </h3>
+                                <p className="mt-1 text-xs font-medium opacity-80">
+                                    {t(`verdictSummary.${verdict.status}` as MessageKey<'positionBudget'>)}
                                 </p>
                             </div>
-                            <ul className="space-y-1 text-sm text-amber-100">
-                                {budget.warnings.map((warning) => (
-                                    <li key={warning} className="leading-relaxed">
-                                        ·{' '}
-                                        {BUDGET_WARNING_KEYS[warning]
-                                            ? t(BUDGET_WARNING_KEYS[warning])
-                                            : warning}
-                                    </li>
-                                ))}
-                            </ul>
+                            <div className="rounded-2xl bg-black/20 px-3 py-2 mono text-sm font-black">
+                                {verdict.grade}
+                            </div>
+                        </div>
+                        <div className="mt-4 grid gap-2">
+                            {verdict.checks.map((check) => (
+                                <div
+                                    key={check.key}
+                                    className="flex items-center justify-between gap-3 rounded-2xl bg-black/20 border border-white/5 px-3 py-2"
+                                >
+                                    <span className="text-xs font-bold">
+                                        {t(`verdictChecks.${check.key}` as MessageKey<'positionBudget'>)}
+                                    </span>
+                                    <span className={`text-[10px] font-black uppercase tracking-widest ${checkStatusClass(check.status)}`}>
+                                        {t(`checkStatus.${check.status}` as MessageKey<'positionBudget'>)}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {budget.errors.length > 0 ? (
+                        <div className="mt-3 rounded-2xl border border-rose-500/20 bg-rose-500/5 px-4 py-3">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-rose-300">
+                                {t('fieldAlerts')}
+                            </p>
+                            <p className="mt-1 text-xs text-rose-100 leading-relaxed">
+                                {budget.errors
+                                    .slice(0, 2)
+                                    .map((error) => BUDGET_ERROR_KEYS[error] ? t(BUDGET_ERROR_KEYS[error]) : error)
+                                    .join(' · ')}
+                            </p>
+                        </div>
+                    ) : budget.warnings.length > 0 ? (
+                        <div className="mt-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+                            <p className="text-xs text-amber-100 leading-relaxed">
+                                {budget.warnings
+                                    .map((warning) => BUDGET_WARNING_KEYS[warning] ? t(BUDGET_WARNING_KEYS[warning]) : warning)
+                                    .join(' · ')}
+                            </p>
                         </div>
                     ) : null}
 
@@ -849,16 +958,17 @@ export default function PositionBudgetToolPage() {
                         {t('disclaimer')}
                     </p>
                 </section>
+                </div>
 
                 {/* Recent snapshots section */}
                 <section className="glass-card">
                     <div className="flex items-center justify-between gap-3 mb-4">
                         <div>
                             <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-                                {t('recentHeading')}
+                                {t('recentSnapshots')}
                             </h2>
                             <p className="mt-1 text-[10px] text-slate-600 font-medium">
-                                {t('recentHint')}
+                                {t('recentSnapshotsHint')}
                             </p>
                         </div>
                         <button
@@ -883,66 +993,35 @@ export default function PositionBudgetToolPage() {
                             {t('recentEmpty')}
                         </p>
                     ) : (
-                        <div className="space-y-2">
+                        <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+                            <div className="flex gap-3 sm:grid sm:grid-cols-3 lg:grid-cols-4">
                             {snapshots.map((snapshot) => {
-                                const multiple = snapshotRMultiple(snapshot);
+                                const tone = snapshotStatusTone(snapshot);
                                 return (
                                     <button
                                         key={snapshot.snapshot_id}
                                         type="button"
                                         onClick={() => loadSnapshotAsCurrent(snapshot)}
-                                        className="w-full text-left rounded-2xl border border-white/5 bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.99] transition-all p-4"
+                                        className="min-w-[185px] sm:min-w-0 text-left rounded-2xl border border-white/10 bg-white/[0.035] hover:bg-white/[0.07] active:scale-[0.99] transition-all p-3.5"
+                                        title={t('loadSnapshot')}
                                     >
-                                        <div className="flex items-center justify-between gap-3">
-                                            <div>
-                                                <p className="text-sm font-black italic tracking-tighter text-white">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-black italic tracking-tighter text-white">
                                                     {snapshot.symbol}
                                                 </p>
-                                                <p className="mt-1 text-[10px] text-slate-500 mono uppercase tracking-widest">
-                                                    {fmtDate(snapshot.created_at, locale)}
+                                                <p className="mt-1 truncate text-[11px] text-slate-400">
+                                                    {fmt(snapshot.position_size, 0, locale)} {t('sharesUnit').toLowerCase()}{' '}
+                                                    <span className="text-slate-600">·</span>{' '}
+                                                    {fmtRelativeTime(snapshot.created_at, locale)}
                                                 </p>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-sm font-black text-indigo-300 mono">
-                                                    {fmt(snapshot.position_size, 0, locale)}
-                                                </p>
-                                                <p className="mt-1 text-[10px] text-slate-500 uppercase tracking-widest">
-                                                    {t('resultShares')}
-                                                </p>
-                                            </div>
+                                            <span className={`mt-5 h-2 w-2 shrink-0 rounded-full ${snapshotDotClass(tone)}`} />
                                         </div>
-                                        <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2 text-[10px]">
-                                            <SnapshotMetric
-                                                label={t('fieldAccountSize')}
-                                                value={fmt(snapshot.account_size, 2, locale)}
-                                            />
-                                            <SnapshotMetric
-                                                label={t('fieldRiskPct')}
-                                                value={`${fmt(snapshot.risk_ratio * 100, 2, locale)}%`}
-                                            />
-                                            <SnapshotMetric
-                                                label={t('fieldEntry')}
-                                                value={fmt(snapshot.entry_price, 4, locale)}
-                                            />
-                                            <SnapshotMetric
-                                                label={t('resultStop')}
-                                                value={fmt(snapshot.stop_loss_price, 4, locale)}
-                                            />
-                                            <SnapshotMetric
-                                                label={t('resultExpectedLoss')}
-                                                value={fmt(snapshot.expected_loss, 2, locale)}
-                                            />
-                                            <SnapshotMetric
-                                                label={t('resultRMultiple')}
-                                                value={multiple == null ? '—' : `${fmt(multiple, 2, locale)}R`}
-                                            />
-                                        </div>
-                                        <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-indigo-400">
-                                            {t('loadSnapshot')}
-                                        </p>
                                     </button>
                                 );
                             })}
+                            </div>
                         </div>
                     )}
                 </section>
@@ -950,11 +1029,20 @@ export default function PositionBudgetToolPage() {
 
             {/* Sticky action bar */}
             <div className="fixed bottom-0 left-0 right-0 z-30 bg-[#050508]/95 backdrop-blur-sm border-t border-white/5">
-                <div className="mx-auto max-w-4xl px-6 py-4 flex items-center gap-3">
+                <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3">
+                    <div className="min-w-0 flex-1">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
+                            {t('stickyResult')}
+                        </p>
+                        <p className="mt-1 truncate text-xs sm:text-sm font-black mono text-white">
+                            {fmt(budget.positionSize, 0, locale)} {t('sharesUnit')} ·{' '}
+                            {fmt(budget.expectedLoss, 2, locale)} {t('maxLossShort')} · {stickyRMultiple}
+                        </p>
+                    </div>
                     <button
                         onClick={() => void saveAll()}
                         disabled={!canSave}
-                        className="flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_10px_25px_rgba(99,102,241,0.25)]"
+                        className="shrink-0 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] sm:text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_10px_25px_rgba(99,102,241,0.25)]"
                     >
                         {saving ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -974,17 +1062,15 @@ function FieldNumber({
     value,
     onChange,
     placeholder,
-    hint,
 }: {
     label: string;
     value: string;
     onChange: (next: string) => void;
     placeholder?: string;
-    hint?: string;
 }) {
     return (
         <label className="block">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1.5">
+            <p className="mb-1 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 truncate">
                 {label}
             </p>
             <input
@@ -992,14 +1078,120 @@ function FieldNumber({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-3 mono text-sm focus:outline-none focus:border-indigo-500/50 focus:bg-black/60 transition-colors placeholder:text-slate-600"
+                className="w-full bg-black/40 border border-white/5 rounded-xl px-3 py-2.5 mono text-sm focus:outline-none focus:border-indigo-500/50 focus:bg-black/60 transition-colors placeholder:text-slate-600"
             />
-            {hint ? (
-                <p className="mt-1.5 text-[10px] text-slate-600 font-medium leading-relaxed">
-                    {hint}
-                </p>
-            ) : null}
         </label>
+    );
+}
+
+function buildSparklinePath(points: PositionBudgetPricePoint[], width: number, height: number, padding: number): string {
+    if (points.length < 2) return '';
+    const closes = points.map((point) => point.close);
+    const min = Math.min(...closes);
+    const max = Math.max(...closes);
+    const range = max - min || 1;
+    return points
+        .map((point, index) => {
+            const x = padding + (index / (points.length - 1)) * (width - padding * 2);
+            const y = padding + ((max - point.close) / range) * (height - padding * 2);
+            return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+        })
+        .join(' ');
+}
+
+function MiniTrendSparkline({
+    loading,
+    points,
+}: {
+    loading: boolean;
+    points: PositionBudgetPricePoint[];
+}) {
+    const width = 132;
+    const height = 42;
+    const padding = 4;
+    const hasRealPoints = points.length >= 2;
+    const realPath = buildSparklinePath(points, width, height, padding);
+    const firstClose = hasRealPoints ? points[0].close : null;
+    const lastClose = hasRealPoints ? points[points.length - 1].close : null;
+    const positive = firstClose !== null && lastClose !== null ? lastClose >= firstClose : true;
+    const gradientId = positive ? 'position-budget-sparkline-up' : 'position-budget-sparkline-down';
+    const glowId = positive ? 'position-budget-sparkline-up-glow' : 'position-budget-sparkline-down-glow';
+    const fallbackPath = 'M3 34 C 14 32, 18 27, 27 29 S 40 34, 50 27 S 61 16, 72 20 S 84 29, 95 21 S 111 8, 129 4';
+
+    return (
+        <div
+            className={`flex h-12 w-28 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/[0.03] px-1.5 sm:w-36 ${loading ? 'animate-pulse' : ''}`}
+            aria-hidden="true"
+        >
+            <svg viewBox={`0 0 ${width} ${height}`} className="h-10 w-full overflow-visible">
+                <defs>
+                    <linearGradient id="position-budget-sparkline-up" x1="0" x2="1" y1="0" y2="0">
+                        <stop offset="0%" stopColor="rgb(74 222 128)" stopOpacity="0.18" />
+                        <stop offset="42%" stopColor="rgb(34 197 94)" stopOpacity="0.72" />
+                        <stop offset="100%" stopColor="rgb(134 239 172)" stopOpacity="1" />
+                    </linearGradient>
+                    <linearGradient id="position-budget-sparkline-down" x1="0" x2="1" y1="0" y2="0">
+                        <stop offset="0%" stopColor="rgb(248 113 113)" stopOpacity="0.2" />
+                        <stop offset="48%" stopColor="rgb(239 68 68)" stopOpacity="0.76" />
+                        <stop offset="100%" stopColor="rgb(251 113 133)" stopOpacity="1" />
+                    </linearGradient>
+                    <filter id="position-budget-sparkline-up-glow" x="-20%" y="-80%" width="140%" height="260%">
+                        <feGaussianBlur stdDeviation="2.4" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                    <filter id="position-budget-sparkline-down-glow" x="-20%" y="-80%" width="140%" height="260%">
+                        <feGaussianBlur stdDeviation="2.4" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+                <path
+                    d={hasRealPoints ? realPath : fallbackPath}
+                    fill="none"
+                    stroke={`url(#${gradientId})`}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeOpacity={hasRealPoints ? 1 : 0.45}
+                    strokeWidth={hasRealPoints ? 2.6 : 2.4}
+                    filter={`url(#${glowId})`}
+                />
+                <path
+                    d="M3 38 C 21 35, 42 36, 59 32 S 90 26, 129 17"
+                    fill="none"
+                    stroke={positive ? 'rgb(52 211 153)' : 'rgb(248 113 113)'}
+                    strokeLinecap="round"
+                    strokeOpacity={hasRealPoints ? 0.12 : 0.08}
+                    strokeWidth="1.2"
+                />
+                {hasRealPoints && realPath ? (
+                    <circle
+                        cx={(
+                            padding +
+                            ((points.length - 1) / (points.length - 1)) * (width - padding * 2)
+                        ).toFixed(2)}
+                        cy={(() => {
+                            const closes = points.map((point) => point.close);
+                            const min = Math.min(...closes);
+                            const max = Math.max(...closes);
+                            const range = max - min || 1;
+                            return (
+                                padding +
+                                ((max - points[points.length - 1].close) / range) * (height - padding * 2)
+                            ).toFixed(2);
+                        })()}
+                        r="2.2"
+                        fill={positive ? 'rgb(134 239 172)' : 'rgb(251 113 133)'}
+                    />
+                ) : (
+                    <circle cx="129" cy="4" r="2.2" fill="rgb(134 239 172)" opacity="0.5" />
+                )}
+            </svg>
+        </div>
     );
 }
 
@@ -1012,13 +1204,15 @@ function ResultCell({
     label: string;
     value: string;
     icon?: React.ReactNode;
-    tone?: 'primary' | 'warning';
+    tone?: 'primary' | 'warning' | 'risk';
 }) {
     const accent =
         tone === 'primary'
             ? 'text-indigo-300'
             : tone === 'warning'
               ? 'text-amber-300'
+              : tone === 'risk'
+                ? 'text-rose-300'
               : 'text-white';
     return (
         <div className="rounded-2xl border border-white/5 bg-black/30 p-4">
@@ -1031,13 +1225,29 @@ function ResultCell({
     );
 }
 
-function SnapshotMetric({ label, value }: { label: string; value: string }) {
-    return (
-        <div className="rounded-xl bg-black/20 border border-white/5 px-3 py-2">
-            <p className="text-slate-600 font-black uppercase tracking-widest truncate">
-                {label}
-            </p>
-            <p className="mt-1 mono text-slate-200 font-bold truncate">{value}</p>
-        </div>
-    );
+function verdictPillClass(status: PositionBudgetVerdictStatus): string {
+    if (status === 'VALID') return 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300';
+    if (status === 'WARNING') return 'bg-amber-500/10 border-amber-500/30 text-amber-300';
+    if (status === 'INVALID') return 'bg-rose-500/10 border-rose-500/30 text-rose-300';
+    return 'bg-slate-500/10 border-slate-500/30 text-slate-300';
+}
+
+function verdictCardClass(status: PositionBudgetVerdictStatus): string {
+    if (status === 'VALID') return 'border-emerald-500/20 bg-emerald-500/10 text-emerald-50';
+    if (status === 'WARNING') return 'border-amber-500/20 bg-amber-500/10 text-amber-50';
+    if (status === 'INVALID') return 'border-rose-500/20 bg-rose-500/10 text-rose-50';
+    return 'border-slate-500/20 bg-slate-500/10 text-slate-100';
+}
+
+function checkStatusClass(status: 'PASS' | 'WARN' | 'FAIL' | 'PENDING'): string {
+    if (status === 'PASS') return 'text-emerald-300';
+    if (status === 'WARN') return 'text-amber-300';
+    if (status === 'FAIL') return 'text-rose-300';
+    return 'text-slate-400';
+}
+
+function snapshotDotClass(tone: 'valid' | 'warning' | 'invalid'): string {
+    if (tone === 'valid') return 'bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.35)]';
+    if (tone === 'warning') return 'bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.35)]';
+    return 'bg-rose-400 shadow-[0_0_12px_rgba(251,113,133,0.35)]';
 }

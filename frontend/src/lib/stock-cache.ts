@@ -45,6 +45,15 @@ JOIN latest l ON dp.symbol = l.symbol AND dp.date = l.max_date
 ORDER BY dp.symbol
 LIMIT ?`;
 
+const PRICE_HISTORY_SQL = `
+SELECT symbol, date, close, change_percent
+FROM daily_prices
+WHERE symbol = ?
+  AND close IS NOT NULL
+ORDER BY date DESC
+LIMIT ?
+`;
+
 async function queryLatestPrices(symbols: string[]): Promise<Record<string, unknown>[]> {
     if (symbols.length === 0) return [];
     const client = getDbClient();
@@ -68,6 +77,31 @@ async function queryLatestPrices(symbols: string[]): Promise<Record<string, unkn
  * 直接查询最新价格（无缓存）— 供价格刷新端点使用，保证实时性。
  */
 export const getLatestPrices = queryLatestPrices;
+
+export async function getPriceHistory(
+    symbol: string,
+    limit: number = 30,
+): Promise<Record<string, unknown>[]> {
+    const normalized = symbol.trim().toUpperCase();
+    if (!normalized) return [];
+    const safeLimit = Number.isFinite(limit) ? Math.min(Math.max(Math.trunc(limit), 2), 90) : 30;
+    const client = getDbClient();
+    try {
+        let rows: Record<string, unknown>[] = [];
+        if ('execute' in client) {
+            const rs = await client.execute({
+                sql: PRICE_HISTORY_SQL,
+                args: [normalized, safeLimit],
+            });
+            rows = rs.rows as Record<string, unknown>[];
+        } else {
+            rows = client.prepare(PRICE_HISTORY_SQL).all(normalized, safeLimit) as any[];
+        }
+        return rows.reverse();
+    } finally {
+        if (client && typeof (client as any).close === 'function') (client as any).close();
+    }
+}
 
 /**
  * 缓存获取最新价格 (2分钟) — 供 batch 端点使用，平衡新鲜度与 DB 负载。

@@ -39,6 +39,12 @@ export type PositionBudgetSnapshot = {
   created_at: string;
 };
 
+export type PositionBudgetPricePoint = {
+  date: string | null;
+  close: number;
+  change_percent: number | null;
+};
+
 async function readJson(response: Response): Promise<Record<string, unknown>> {
   return response.json().catch(() => ({}));
 }
@@ -74,6 +80,34 @@ export async function fetchPositionBudgetStockIdentity(
   const data = await readJson(response);
   const rows = Array.isArray(data.results) ? (data.results as StockSearchHit[]) : [];
   return rows.find((row) => row.symbol?.toUpperCase() === normalized) ?? rows[0] ?? null;
+}
+
+export async function fetchPositionBudgetPriceHistory(
+  symbol: string,
+  limit: number = 30,
+): Promise<PositionBudgetPricePoint[]> {
+  const normalized = symbol.trim().toUpperCase();
+  if (!normalized) return [];
+  const qs = new URLSearchParams({
+    symbol: normalized,
+    limit: String(limit),
+  });
+  const response = await fetch(`/api/stock/prices/history?${qs.toString()}`);
+  if (!response.ok) return [];
+  const data = await readJson(response);
+  const rows = Array.isArray(data.prices) ? data.prices : [];
+  return rows
+    .map((row) => {
+      const item = row as Record<string, unknown>;
+      const close = Number(item.close);
+      const changePercent = Number(item.change_percent);
+      return {
+        date: item.date == null ? null : String(item.date),
+        close,
+        change_percent: Number.isFinite(changePercent) ? changePercent : null,
+      };
+    })
+    .filter((row): row is PositionBudgetPricePoint => Number.isFinite(row.close));
 }
 
 export async function savePositionBudgetPreferences(

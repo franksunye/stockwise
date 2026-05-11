@@ -6,6 +6,7 @@ import { describe, it } from 'node:test';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const moduleUrl = pathToFileURL(path.resolve(__dirname, '../src/lib/position-budget.ts')).href;
 const {
+  buildPositionBudgetVerdict,
   computePositionBudget,
   isValidPositionBudgetSymbol,
 } = await import(moduleUrl);
@@ -26,7 +27,13 @@ describe('position budget compute', () => {
     assert.equal(result.riskPerShare, 5);
     assert.equal(result.positionSize, 200);
     assert.equal(result.expectedLoss, 1000);
+    assert.equal(result.positionValue, 20_000);
+    assert.equal(result.accountExposurePercent, 20);
     assert.equal(result.rMultiple, 4);
+
+    const verdict = buildPositionBudgetVerdict(result);
+    assert.equal(verdict.status, 'VALID');
+    assert.equal(verdict.checks.some((check) => check.key === 'exposure' && check.status === 'PASS'), true);
   });
 
   it('warns above 2% risk and blocks above 5%', () => {
@@ -39,6 +46,7 @@ describe('position budget compute', () => {
     });
     assert.equal(warning.ok, true);
     assert.deepEqual(warning.warnings, ['Risk ratio is above 2%']);
+    assert.equal(buildPositionBudgetVerdict(warning).status, 'WARNING');
 
     const blocked = computePositionBudget({
       accountSize: 100_000,
@@ -49,6 +57,7 @@ describe('position budget compute', () => {
     });
     assert.equal(blocked.ok, false);
     assert.ok(blocked.errors.includes('Risk ratio must not exceed 5%'));
+    assert.equal(buildPositionBudgetVerdict(blocked).status, 'INVALID');
   });
 
   it('supports percent stop mode boundaries', () => {
@@ -84,6 +93,37 @@ describe('position budget compute', () => {
 
     assert.equal(result.ok, false);
     assert.ok(result.errors.includes('Position notional exceeds account size'));
+    assert.equal(buildPositionBudgetVerdict(result).status, 'INVALID');
+  });
+
+  it('returns incomplete verdict for missing required fields', () => {
+    const result = computePositionBudget({
+      accountSize: 0,
+      riskRatio: 0,
+      entryPrice: 0,
+      rMode: 'fixed_stop',
+      fixedStopLossPrice: null,
+    });
+
+    const verdict = buildPositionBudgetVerdict(result);
+    assert.equal(verdict.status, 'INCOMPLETE');
+    assert.equal(verdict.checks[0].status, 'PENDING');
+  });
+
+  it('warns when actual R multiple is below discipline target', () => {
+    const result = computePositionBudget({
+      accountSize: 100_000,
+      riskRatio: 0.01,
+      entryPrice: 100,
+      targetPrice: 106,
+      rMode: 'fixed_stop',
+      fixedStopLossPrice: 95,
+    });
+
+    const verdict = buildPositionBudgetVerdict(result);
+    assert.equal(result.rMultiple, 1.2);
+    assert.equal(verdict.status, 'WARNING');
+    assert.equal(verdict.checks.some((check) => check.key === 'r_multiple' && check.status === 'WARN'), true);
   });
 });
 
