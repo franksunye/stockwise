@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Plus, Trash2, ArrowLeft, TrendingUp, TrendingDown, Minus, LayoutGrid } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,8 +15,9 @@ import type { AIPrediction } from '@/lib/types';
 import { writeDashboardNavIntentSymbol } from '@/lib/dashboard-symbol-navigation';
 import { useT, useLocale } from '@/context/LocaleContext';
 import { getLocalizedStockName } from '@/lib/stock-name';
-import { getMarketBadge } from '@/lib/market-badge';
 import type { MessageKey } from '@/lib/i18n';
+import { StockSymbolSearchField } from '@/components/stock/StockSymbolSearchField';
+import { useStockSymbolSearch } from '@/hooks/useStockSymbolSearch';
 
 interface StockSnapshot {
   symbol: string;
@@ -161,14 +162,20 @@ export default function StockPoolPage() {
   // Compounded loading state
   const loading = loadingList || loadingPool;
   
-  const [newSymbol, setNewSymbol] = useState('');
   const [showAdd, setShowAdd] = useState(false);
-  const [searchResults, setSearchResults] = useState<{symbol: string; name: string; name_en?: string | null; market?: string}[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [stockToDelete, setStockToDelete] = useState<StockSnapshot | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
-  const searchAbortRef = useRef<AbortController | null>(null);
+  const {
+    query,
+    setQuery,
+    searchResults,
+    showSuggestions,
+    setShowSuggestions,
+    searching,
+    runSearchNow,
+    resetSearch,
+  } = useStockSymbolSearch();
 
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
 
@@ -179,41 +186,8 @@ export default function StockPoolPage() {
     router.prefetch('/dashboard');
   }, [router]);
 
-  useEffect(() => {
-    const timer = setTimeout(async () => {
-      const query = newSymbol.trim();
-      if (query) {
-        try {
-          searchAbortRef.current?.abort();
-          const controller = new AbortController();
-          searchAbortRef.current = controller;
-
-          const res = await fetch(`/api/stock/search?q=${encodeURIComponent(query)}`, {
-            signal: controller.signal
-          });
-          if (!res.ok) throw new Error('Search request failed');
-          const data = await res.json();
-          setSearchResults(data.results || []);
-          setShowSuggestions(true);
-        } catch (e) {
-          if ((e as Error).name !== 'AbortError') {
-            console.error('Search failed', e);
-          }
-        }
-      } else {
-        searchAbortRef.current?.abort();
-        setSearchResults([]);
-        setShowSuggestions(false);
-      }
-    }, 300);
-    return () => {
-      clearTimeout(timer);
-      searchAbortRef.current?.abort();
-    };
-  }, [newSymbol]);
-
   const handleAdd = async (symbolOverride?: string, nameOverride?: string, nameEnOverride?: string | null) => {
-    const targetSymbol = symbolOverride || newSymbol.trim();
+    const targetSymbol = symbolOverride || query.trim();
     if (!targetSymbol) return;
     
     const isFreeTier = tier === 'free';
@@ -225,9 +199,8 @@ export default function StockPoolPage() {
     }
 
     // Close the search panel immediately so optimistic watchlist updates feel instant.
-    setNewSymbol('');
+    resetSearch();
     setShowAdd(false);
-    setShowSuggestions(false);
 
     const ok = await addStock(targetSymbol, nameOverride || targetSymbol, nameEnOverride);
     if (!ok) {
@@ -319,53 +292,35 @@ export default function StockPoolPage() {
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               className="mb-8 glass-card p-4 border-indigo-500/20 bg-indigo-500/5"
             >
-              <div className="relative">
-                <input 
-                  autoFocus
-                  placeholder={t('searchHint')}
-                  value={newSymbol}
-                  onChange={(e) => setNewSymbol(e.target.value)}
-                  className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 mono text-sm focus:outline-none focus:border-indigo-500/50"
-                />
-                <AnimatePresence>
-                  {limitMsg && (
-                    <motion.p 
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="mt-3 text-rose-400 text-[10px] font-bold text-center uppercase tracking-widest"
-                    >
-                      {limitMsg}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-                {showSuggestions && searchResults.length > 0 && (
-                  <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
-                    {searchResults.map(item => {
-                      const badge = getMarketBadge(item.market, 'compact', locale);
-                      return (
-                        <button key={item.symbol} onClick={() => handleAdd(item.symbol, item.name, item.name_en)} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-black ${badge.className}`}>
-                              {badge.label}
-                            </div>
-                            <div className="text-left">
-                               <p className="text-sm font-bold">{getLocalizedStockName(item, stockLocale)}</p>
-                               <p className="text-[10px] text-slate-500 mono uppercase">{item.symbol}{badge.suffix}</p>
-                            </div>
-                          </div>
-                          <Plus size={16} className="text-slate-500" />
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-                {showSuggestions && searchResults.length === 0 && newSymbol.trim().length > 0 && (
-                  <div className="mt-4 py-8 text-center text-slate-500 text-xs">
-                    <p className="mb-1">{t('noResults')}</p>
-                  </div>
-                )}
-              </div>
+              <StockSymbolSearchField
+                autoFocus
+                query={query}
+                onQueryChange={setQuery}
+                searchResults={searchResults}
+                showSuggestions={showSuggestions}
+                onShowSuggestionsChange={setShowSuggestions}
+                searching={searching}
+                runSearchNow={runSearchNow}
+                locale={locale}
+                stockLocale={stockLocale}
+                onSelect={(hit) => void handleAdd(hit.symbol, hit.name, hit.name_en)}
+                placeholder={t('searchHint')}
+                noResultsText={t('noResults')}
+                belowInput={
+                  <AnimatePresence>
+                    {limitMsg ? (
+                      <motion.p
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="mt-3 text-rose-400 text-[10px] font-bold text-center uppercase tracking-widest"
+                      >
+                        {limitMsg}
+                      </motion.p>
+                    ) : null}
+                  </AnimatePresence>
+                }
+              />
             </motion.div>
           )}
         </AnimatePresence>

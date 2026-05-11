@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/react";
 import Image from "next/image";
 import Script from "next/script";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
+import { SplashDismiss } from "@/components/SplashDismiss";
 import { buildRootBootstrapInlineScript } from "@/lib/root-bootstrap";
 
 type AppDocumentShellProps = {
@@ -51,6 +52,7 @@ export function AppDocumentShell({ children, htmlLang }: AppDocumentShellProps) 
           }}
         />
         {children}
+        <SplashDismiss />
         <ServiceWorkerRegistrar />
         <Analytics />
         <Script

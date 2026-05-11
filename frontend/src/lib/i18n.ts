@@ -142,6 +142,26 @@ export function resolveLocale(profileLocale?: string | null): AppLocale {
 }
 
 /**
+ * Locale for SSR / first paint when `window` and `localStorage` are unavailable.
+ * Align with `resolveLocale` as much as possible: cookie → profile → Accept-Language → default.
+ * (Client-side `resolveLocale` still prefers `localStorage` first; we re-sync after mount when using `serverInitialLocale`.)
+ */
+export function resolveLocaleFromServerHints(
+  cookieLocaleToken: string | null | undefined,
+  acceptLanguage: string | null | undefined,
+  profileLocale?: string | null,
+): AppLocale {
+  const fromCookie = inferLocaleFromToken(cookieLocaleToken ?? null);
+  if (fromCookie) return fromCookie;
+  const fromProfile = inferLocaleFromToken(profileLocale ?? null);
+  if (fromProfile) return fromProfile;
+  const firstLang = acceptLanguage?.split(',')[0]?.trim() ?? null;
+  const fromAccept = inferLocaleFromToken(firstLang);
+  if (fromAccept) return fromAccept;
+  return DEFAULT_APP_LOCALE;
+}
+
+/**
  * Persist locale choice to localStorage.
  */
 export function persistLocale(locale: AppLocale): void {

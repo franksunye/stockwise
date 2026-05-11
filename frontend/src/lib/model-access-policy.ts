@@ -60,8 +60,13 @@ export async function getAllowedPredictionModelIdsForTier(
         rows = db.prepare(sql).all() as ModelRow[];
     }
 
+    // Legacy rows often omit `access.prediction_tiers`; treat that as "no restriction"
+    // so batch + dashboard still resolve prices/predictions (otherwise allowed=[] short-circuits batch).
     const allowed = rows
-        .filter((row) => parsePredictionTiers(row.config_json).includes(normalizedTier))
+        .filter((row) => {
+            const tiers = parsePredictionTiers(row.config_json);
+            return tiers.length === 0 || tiers.includes(normalizedTier);
+        })
         .map((row) => row.model_id);
 
     _cache.set(cacheKey, { ids: allowed, ts: Date.now() });

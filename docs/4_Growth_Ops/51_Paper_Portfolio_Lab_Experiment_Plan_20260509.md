@@ -264,3 +264,34 @@ Phase 0.1 最终调整为独立英文实验页 `/paper-portfolio-lab`，而不�
 - 不引入真实 order / brokerage / copy-trading 语义。
 
 0.1 的判断标准不是“功能完整”，而是页面是否让英文用户一眼理解这是一个可持续关注的 AI thesis tracking experiment，并愿意点击 beta / follow CTA。
+
+## 11. Phase 0.1 上线后诊断待办（2026-05-09）
+
+`/paper-portfolio-lab` 上线后回看，主要不满意点集中在两条：品牌视觉与首页主行为色脱钩、工程上把独立页伪装成 `currentPage="home"` 触发了真实的导航 / locale 切换 bug。本节落具体修复清单，按优先级排序，等启动 Phase 0.1 修补轮再迁回 Backlog v1 执行面。
+
+### 11.1 P0（顶部导航真实 bug，必须修）
+
+- 顶部导航 Features / FAQ 锚点失效：`MarketingHeader.tsx:28,72,77` 在 `currentPage === 'home'` 时把 anchor 前缀置空，导致从 `/paper-portfolio-lab` 上点击会停在 `/paper-portfolio-lab#features` / `#faq`（本页无该 anchor），不会跳回首页 anchor。
+- 语言切换器丢上下文：`MarketingHeader.tsx:87-92` 在 `currentPage === 'home'` 时把切换链接构造为各语种首页，用户在本页点 中文 / 한 / ES 会被静默扔到 `/zh-CN/` 等首页。
+- 修复方向：把 `MarketingHeaderPage` 类型扩展加 `'paper-portfolio-lab'`，本页改写 `<PageShell currentPage="paper-portfolio-lab">`；`MarketingHeader` 在该 currentPage 下让 anchor 前缀正确指向首页、且隐藏或 disable 语言切换器（本页是 EN-only 实验）。
+
+### 11.2 P1（品牌一致性 + 工程契约）
+
+- 主 CTA 颜色 / 形状 / 阴影：`EnglishPaperPortfolioLabPage.tsx:125` 当前 `bg-cyan-500 text-black rounded-2xl` 无阴影，与首页 `EnglishHomePage.tsx:80` 的 `bg-indigo-500 text-white rounded-3xl shadow-[0_20px_40px_rgba(99,102,241,0.3)]` 主行为色脱钩。整页 indigo 一次都未出现，需要至少在 hero badge / h1 渐变 / 主 CTA 三处之一让 indigo 回归，避免"换了产品"的瞬间错觉。
+- h1 高亮渐变：`EnglishPaperPortfolioLabPage.tsx:115` 单色 `text-cyan-300`，应恢复首页 `bg-gradient-to-r from-indigo-400 to-cyan-300 bg-clip-text text-transparent` 的两段式渐变。
+- `MarketingHeaderPage` 类型修复：`MarketingHeader.tsx:9` 与 `EnLayout.tsx:11` 的 union 当前不含本页，被强行塞 `'home'` 绕过类型系统；同 P0 修复一并完成。
+- 埋点契约对账：实验计划第 70-74 行列出的 `paper_lab_waitlist_submit` 在 `EnglishPaperPortfolioLabPage.tsx:67-91` 未接（也无 waitlist 表单）；要么补一个真实 waitlist 表单（推荐复用现有 invite / feedback 通道），要么把文档里这条事件标记为延后到 Phase 1。
+- metadata `keywords` 合规口径：`paper-portfolio-lab/layout.tsx:11-12` 加入了 `paper portfolio` / `paper trading` 等敏感词，需要先和 `brandCoreEn.boundaryNotice` 的措辞口径对齐再确认是否保留。
+- `alternateLocales` 与 UI 切换器一致性：`paper-portfolio-lab/layout.tsx:11` 写 `['en']`（EN-only 策略），但页面仍展示四语种切换器，hreflang 与 UI 不一致；需配合 P0 切换器隐藏方案一并收口。
+
+### 11.3 P2（节奏 / 信息架构 / 重构）
+
+- Hero 排版从首页中轴居中破成左对齐网格：`EnglishPaperPortfolioLabPage.tsx:105` 与首页 `EnglishHomePage.tsx:59` 节奏不一致，建议改回中轴或保留左对齐但新增设计理由说明。
+- 状态栏样本与定语混排：`EnglishPaperPortfolioLabPage.tsx:160` 当前列 `['Season 0', 'Simulated', 'No P&L', 'NVDA', 'MSFT']` 漏了 TSLA，且把"实验阶段"、"合规标签"、具体 ticker 塞进同一条，建议拆成"阶段标签"和"样本 ticker"两栏。
+- `tracking-*` 数值五个值在同页轮换（`tracking-widest` / `tracking-[0.16em]` / `tracking-[0.2em]` / `tracking-[0.14em]` / `tracking-tighter`），建议收敛到 2-3 个层级值。
+- JsonLd 稀薄：`EnglishPaperPortfolioLabPage.tsx:93-99` 仅 `@type: WebPage` 三字段，建议补 `url` / `isPartOf` / `inLanguage` / `publisher`，与首页 / About JsonLd 对齐。
+- 文件结构：268 行单 client 文件混 data / view / analytics / JsonLd，未来 Phase 1 接配置化数据时需要把 `paperLabCases` / `paperLabLogs` 抽成可外部维护的数据源（例如 `frontend/src/content/paper-lab/cases.en.ts`），不然每条 thesis 更新都要走前端 PR。
+
+### 11.4 已核实非本页问题（不进入修复清单）
+
+- `paper-portfolio-lab/layout.tsx:2` 用 `brandCoreZhCN` 取 domain：和 `pricing/layout.tsx:2`、`about/layout.tsx:2` 是仓库现有约定，不是本页特有问题。后续可在仓库层面起一个"为 EN 页接 `brandCoreEn`"的小重构 ticket，但不阻塞本页的 0.1 修补轮。

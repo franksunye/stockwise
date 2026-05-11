@@ -709,5 +709,87 @@
     "keyLevels": "关键点位",
     "exportedAt": "导出于 {date}",
     "share": "分享报告"
+  },
+  "positionBudget": {
+    "titleLine": "仓位预算",
+    "titleWordmark": "插件",
+    "subtitle": "风险 · 1R · 仓位",
+    "stepSelect": "① 选择股票",
+    "stepRisk": "② 风险参数",
+    "stepResult": "③ 预算结果",
+    "clear": "清除",
+    "rePrefill": "重新预填",
+    "searchPlaceholder": "代码 / 名称 / 拼音首字母（如 600519、贵州茅台、GZMT）",
+    "searchNoResults": "未找到匹配的股票",
+    "searchContinueAsCode": "按代码继续：{code}",
+    "watchlistHeading": "来自我的监控池",
+    "watchlistEmpty": "监控池为空。登录主站添加自选后，回到此处可一键选择。",
+    "selectedClose": "收盘",
+    "fieldAccountSize": "账户规模",
+    "fieldAccountSizeHint": "本工具支持的总资金（单位：账户币种）",
+    "fieldRiskPct": "单笔风险比例（%）",
+    "fieldRiskPctHint": "单笔交易愿意承担的最大亏损占比",
+    "fieldEntry": "入场价",
+    "fieldEntryHint": "计划买入价格",
+    "fieldTarget": "目标价（可选）",
+    "fieldTargetHint": "用于推导 R 倍数；未填则不计算",
+    "stopModeHeading": "止损方式",
+    "fieldStopPct": "百分比止损（%）",
+    "fieldSystemStop": "系统止损位",
+    "fieldFixedStop": "固定止损价",
+    "statusOk": "OK",
+    "statusIncomplete": "待补完",
+    "loadingPreferences": "正在加载用户偏好...",
+    "paramsIncomplete": "参数不完整",
+    "resultRisk1R": "1R 风险金额",
+    "resultRiskPerShare": "每股风险",
+    "resultShares": "建议股数",
+    "resultExpectedLoss": "预计亏损",
+    "resultStop": "止损价",
+    "resultRMultiple": "R 倍数",
+    "noticeHeading": "注意",
+    "disclaimer": "本工具为风险预算辅助工具，所有计算结果基于您输入的数据与系统参数。不构成投资建议，不保证盈利。市场有风险，投资需谨慎。",
+    "saveBusy": "保存中...",
+    "saveCta": "保存偏好与预算快照",
+    "errLoadStockProfile": "加载股票档案失败，请稍后重试",
+    "infoNoTactical": "该股票暂无可用的战术档案，请手动填入入场价与止损位",
+    "successPrefilled": "已根据战术档案完成预填，请确认参数",
+    "errPrefill": "预填失败，请稍后重试",
+    "errSelectStock": "请先选择股票",
+    "errInvalidParams": "当前参数不合法，无法保存",
+    "errSavePref": "偏好保存失败",
+    "errSaveSnapshot": "快照保存失败",
+    "successSaved": "保存成功：偏好与预算快照已落库",
+    "errSaveGeneric": "保存失败，请稍后重试",
+    "rMode": {
+      "system_followed": {
+        "label": "系统位",
+        "hint": "跟随档案给出的止损"
+      },
+      "fixed_stop": {
+        "label": "固定价",
+        "hint": "指定一个止损价"
+      },
+      "percent_stop": {
+        "label": "百分比",
+        "hint": "入场价 × (1−x%)"
+      }
+    },
+    "budgetErrors": {
+      "invalidAccountSize": "账户规模无效",
+      "invalidRiskRatio": "风险比例无效",
+      "riskRatioMin": "风险比例不得低于 0.1%",
+      "riskRatioMax": "风险比例不得超过 5%",
+      "invalidEntryPrice": "入场价无效",
+      "missingStopPercent": "请填写百分比止损",
+      "stopPercentRange": "百分比止损须在 1%–10% 之间",
+      "invalidStopLossPrice": "止损价无效",
+      "entryAboveStop": "入场价须高于止损价",
+      "positionSizeZero": "在当前参数下可买股数为 0",
+      "notionalExceedsAccount": "仓位名义金额超过账户规模"
+    },
+    "budgetWarnings": {
+      "riskRatioHigh": "风险比例高于 2%"
+    }
   }
 }

@@ -108,7 +108,13 @@ export function buildStockFacts(params: {
         const rawHistory = historyBySymbol.get(sym) || [];
         const price = priceMap.get(sym);
         const validPreds = rawHistory.filter((row) => {
-            const date = typeof row.date === 'string' ? row.date : '';
+            const raw = row.date ?? row.target_date;
+            const date =
+                raw == null || raw === ''
+                    ? ''
+                    : typeof raw === 'string'
+                      ? raw.split('T')[0]
+                      : String(raw).split('T')[0];
             return date >= validDateThreshold;
         });
         const strippedHistory = rawHistory.map((row) => stripPredictionRow(row, tier));

@@ -5,7 +5,8 @@ export type PredictionContentLocale = 'cn' | 'en';
  * Must align with `ai_predictions_v2.content_locale` (default stored/fallback is `cn`).
  */
 export function parsePredictionContentLocaleParam(searchParams: URLSearchParams): PredictionContentLocale {
-  return searchParams.get('locale')?.trim().toLowerCase() === 'en' ? 'en' : 'cn';
+  const raw = searchParams.get('locale') ?? searchParams.get('contentLocale');
+  return raw?.trim().toLowerCase() === 'en' ? 'en' : 'cn';
 }
 
 export function appLocaleToPredictionContentLocale(appLocale: string | undefined): PredictionContentLocale {

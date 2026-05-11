@@ -58,6 +58,7 @@
 - 英文站 Paper Portfolio Lab 增长实验：Phase 0.1 已调整为独立英文实验页 `/paper-portfolio-lab`，并在英文 footer 保留轻入口；用于验证用户对 AI-assisted thesis tracking / paper portfolio lab 的兴趣，不接入后台用户级模拟交易功能，也不占用英文首页主叙事。
 - 阶段路线见 `docs/4_Growth_Ops/51_Paper_Portfolio_Lab_Experiment_Plan_20260509.md`。
 - 下一步：观察 `paper_lab_view` / `paper_lab_cta_click` / `paper_lab_case_open`，若出现明确兴趣信号，再进入 Phase 1 公开实验页设计。
+- 0.1 上线后诊断待办：品牌视觉与首页主行为色脱钩、`PageShell currentPage="home"` 引发顶部 Features/FAQ 锚点失效与语言切换器丢上下文、`paper_lab_waitlist_submit` 文档列了但实现未接，详细清单与 P0/P1/P2 分级见上述实验计划第 11 节，待启动 Phase 0.1 修补轮再迁回 v1 执行面。
 
 ---
 

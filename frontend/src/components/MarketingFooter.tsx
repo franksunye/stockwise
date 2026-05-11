@@ -10,6 +10,7 @@ export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLoca
     pricing: string;
     faq: string;
     app: string;
+    positionBudget: string;
     about: string;
     privacy: string;
     terms: string;
@@ -23,6 +24,7 @@ export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLoca
       pricing: '价格方案',
       faq: '常见问题 (FAQ)',
       app: '进入 ZISO App',
+      positionBudget: '仓位预算（网页）',
       about: '关于我们',
       privacy: '隐私协议',
       terms: '服务条款',
@@ -34,6 +36,7 @@ export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLoca
       pricing: 'Pricing',
       faq: 'FAQ',
       app: 'Open ZISO App',
+      positionBudget: 'Position Budget (Web)',
       about: 'About',
       privacy: 'Privacy',
       terms: 'Terms',
@@ -45,6 +48,7 @@ export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLoca
       pricing: '가격',
       faq: 'FAQ',
       app: 'ZISO 앱 열기',
+      positionBudget: '포지션 예산 (웹)',
       about: '소개',
       privacy: '개인정보',
       terms: '약관',
@@ -56,6 +60,7 @@ export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLoca
       pricing: 'Precios',
       faq: 'FAQ',
       app: 'Abrir ZISO App',
+      positionBudget: 'Presupuesto de posición (web)',
       about: 'Nosotros',
       privacy: 'Privacidad',
       terms: 'T&eacute;rminos',
@@ -80,6 +85,10 @@ export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLoca
       links: [
         { href: `${localizedHome}#faq`, label: currentLabels.faq },
         { href: localizePublicPath('/support', locale), label: currentLabels.support },
+        {
+          href: 'https://app.ziso.cc/tools/position-budget',
+          label: currentLabels.positionBudget,
+        },
         ...(locale === 'en' ? [{ href: '/paper-portfolio-lab', label: 'Paper Portfolio Lab' }] : []),
         { href: localizePublicPath('/about', locale), label: currentLabels.about },
       ]

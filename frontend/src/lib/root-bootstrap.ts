@@ -15,17 +15,20 @@ const SPLASH_SESSION_TTL_MS = 120 * 1000;
 export function buildRootBootstrapInlineScript(): string {
   return `
     (function() {
+      function lsGet(key) {
+        try { return window.localStorage.getItem(key); } catch (e) { return null; }
+      }
       try {
         var ua = window.navigator.userAgent;
         var isIOS = /iPhone|iPad|iPod/i.test(ua);
         var isAndroid = /Android/i.test(ua);
         var isMobile = isIOS || isAndroid;
         var now = Date.now();
-        var authCacheRaw = localStorage.getItem('${AUTH_CACHE_KEY}');
-        var currentUserId = localStorage.getItem('${USER_ID_STORAGE_KEY}');
+        var authCacheRaw = lsGet('${AUTH_CACHE_KEY}');
+        var currentUserId = lsGet('${USER_ID_STORAGE_KEY}');
         var profileCacheKey = currentUserId ? '${PROFILE_CACHE_KEY}_' + currentUserId : '${PROFILE_CACHE_KEY}';
-        var profileCacheRaw = localStorage.getItem(profileCacheKey);
-        var hasOnboardedFlag = localStorage.getItem('${HAS_ONBOARDED_KEY}') === 'true';
+        var profileCacheRaw = lsGet(profileCacheKey);
+        var hasOnboardedFlag = lsGet('${HAS_ONBOARDED_KEY}') === 'true';
         var authCache = null;
         var profileCache = null;
 
@@ -54,36 +57,37 @@ export function buildRootBootstrapInlineScript(): string {
         if (canBypassDashboardSkeleton) {
           document.documentElement.classList.add('dashboard-boot-ready');
         }
+      } catch (e) {}
 
+      try {
         var splash = document.getElementById('app-splash');
-        if (splash) {
-          var host = window.location.hostname;
-          var path = window.location.pathname;
-          var isAppHost = host === 'app.ziso.cc' || host.indexOf('app.') === 0;
-          var isDashboardRoute = path === '/dashboard' || path.indexOf('/dashboard/') === 0;
-          var isLocalDev = host === 'localhost' || host === '127.0.0.1';
-
-          var splashTs = parseInt(localStorage.getItem('${SPLASH_TS_KEY}') || '0', 10);
-          var isInSession = Number.isFinite(splashTs) && splashTs > 0
-            ? now - splashTs < ${SPLASH_SESSION_TTL_MS}
-            : false;
-
-          var shouldShowSplash =
-            !isInSession &&
-            isMobile &&
-            (isDashboardRoute || (isAppHost && path === '/') || (isLocalDev && isDashboardRoute));
-
-          if (!shouldShowSplash) {
-            splash.style.opacity = '0';
-            splash.style.pointerEvents = 'none';
-          } else {
-            setTimeout(function() {
-              var s = document.getElementById('app-splash');
-              if (s) { s.style.opacity = '0'; s.style.pointerEvents = 'none'; }
-            }, 4000);
-          }
+        if (!splash) return;
+        var host = window.location.hostname || '';
+        var path = window.location.pathname || '';
+        var isAppHost = host === 'app.ziso.cc' || host.indexOf('app.') === 0;
+        var isDashboardRoute = path === '/dashboard' || path.indexOf('/dashboard/') === 0;
+        var isLocalDev = host === 'localhost' || host === '127.0.0.1';
+        var now2 = Date.now();
+        var splashTs = parseInt(lsGet('${SPLASH_TS_KEY}') || '0', 10);
+        var isInSession = Number.isFinite(splashTs) && splashTs > 0
+          ? now2 - splashTs < ${SPLASH_SESSION_TTL_MS}
+          : false;
+        var isMobile2 = /iPhone|iPad|iPod/i.test(window.navigator.userAgent || '') ||
+          /Android/i.test(window.navigator.userAgent || '');
+        var shouldShowSplash =
+          !isInSession &&
+          isMobile2 &&
+          (isDashboardRoute || (isAppHost && path === '/') || (isLocalDev && isDashboardRoute));
+        if (!shouldShowSplash) {
+          splash.style.opacity = '0';
+          splash.style.pointerEvents = 'none';
+        } else {
+          setTimeout(function() {
+            var s = document.getElementById('app-splash');
+            if (s) { s.style.opacity = '0'; s.style.pointerEvents = 'none'; }
+          }, 4000);
         }
-      } catch(e) {}
+      } catch (e2) {}
     })();
   `;
 }

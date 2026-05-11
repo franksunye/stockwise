@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/dashboard/tools/position-budget',
+        destination: '/tools/position-budget',
+        permanent: false,
+      },
+    ];
+  },
   serverExternalPackages: ['better-sqlite3'],
   images: {
     remotePatterns: [

@@ -60,12 +60,28 @@ interface LocaleProviderProps {
   children: ReactNode;
   /** Optional locale hint from user profile (async, may arrive after mount). */
   profileLocale?: string | null;
+  /**
+   * When set (e.g. from RSC reading cookies + Accept-Language), used as the initial `locale`
+   * so SSR and the first client render match and avoid hydration mismatches. After mount,
+   * we re-apply `resolveLocale(profileLocale)` so `localStorage` can override the server hint.
+   */
+  serverInitialLocale?: AppLocale | null;
 }
 
-export function LocaleProvider({ children, profileLocale }: LocaleProviderProps) {
+export function LocaleProvider({
+  children,
+  profileLocale,
+  serverInitialLocale,
+}: LocaleProviderProps) {
   const [locale, setLocaleState] = useState<AppLocale>(() =>
-    resolveLocale(profileLocale),
+    serverInitialLocale ?? resolveLocale(profileLocale),
   );
+
+  // Reconcile with full client resolution once `window` / localStorage exist (tools pages, etc.).
+  useEffect(() => {
+    if (serverInitialLocale == null) return;
+    setLocaleState(resolveLocale(profileLocale));
+  }, [profileLocale, serverInitialLocale]);
 
   // When profile locale arrives asynchronously, sync if no explicit user choice
   useEffect(() => {

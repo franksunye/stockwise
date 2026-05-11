@@ -709,5 +709,87 @@
     "keyLevels": "Key Levels",
     "exportedAt": "Exported {date}",
     "share": "Share Report"
+  },
+  "positionBudget": {
+    "titleLine": "POSITION BUDGET",
+    "titleWordmark": "PLUGIN",
+    "subtitle": "RISK · 1R · SIZE",
+    "stepSelect": "① SELECT SYMBOL",
+    "stepRisk": "② RISK INPUTS",
+    "stepResult": "③ RESULT",
+    "clear": "Clear",
+    "rePrefill": "Re-fill",
+    "searchPlaceholder": "Symbol, name, or pinyin (e.g. 600519, Moutai, GZMT)",
+    "searchNoResults": "No matches",
+    "searchContinueAsCode": "Continue as {code}",
+    "watchlistHeading": "From my watchlist",
+    "watchlistEmpty": "Watchlist is empty. Add names in the app, then pick them here.",
+    "selectedClose": "Close",
+    "fieldAccountSize": "Account size",
+    "fieldAccountSizeHint": "Total capital for this tool (account currency)",
+    "fieldRiskPct": "Risk per trade (%)",
+    "fieldRiskPctHint": "Max loss as a share of account per trade",
+    "fieldEntry": "Entry price",
+    "fieldEntryHint": "Planned buy price",
+    "fieldTarget": "Target (optional)",
+    "fieldTargetHint": "Used for R-multiple; leave blank to skip",
+    "stopModeHeading": "Stop style",
+    "fieldStopPct": "Stop distance (%)",
+    "fieldSystemStop": "System stop",
+    "fieldFixedStop": "Fixed stop price",
+    "statusOk": "OK",
+    "statusIncomplete": "INCOMPLETE",
+    "loadingPreferences": "Loading preferences...",
+    "paramsIncomplete": "Incomplete inputs",
+    "resultRisk1R": "1R risk ($)",
+    "resultRiskPerShare": "Risk / share",
+    "resultShares": "Shares (floor)",
+    "resultExpectedLoss": "Expected loss",
+    "resultStop": "Stop price",
+    "resultRMultiple": "R-multiple",
+    "noticeHeading": "Note",
+    "disclaimer": "This tool estimates risk budget only. Results depend on your inputs and system parameters. Not investment advice. Markets involve risk.",
+    "saveBusy": "Saving...",
+    "saveCta": "Save prefs & snapshot",
+    "errLoadStockProfile": "Could not load stock profile. Try again.",
+    "infoNoTactical": "No tactical profile for this symbol. Enter entry and stop manually.",
+    "successPrefilled": "Filled from profile—please verify inputs",
+    "errPrefill": "Pre-fill failed. Try again.",
+    "errSelectStock": "Select a symbol first",
+    "errInvalidParams": "Invalid inputs—cannot save",
+    "errSavePref": "Could not save preferences",
+    "errSaveSnapshot": "Could not save snapshot",
+    "successSaved": "Saved: preferences and budget snapshot",
+    "errSaveGeneric": "Save failed. Try again.",
+    "rMode": {
+      "system_followed": {
+        "label": "SYSTEM",
+        "hint": "Use the dossier stop level"
+      },
+      "fixed_stop": {
+        "label": "FIXED",
+        "hint": "Set a stop price"
+      },
+      "percent_stop": {
+        "label": "PCT",
+        "hint": "Entry × (1 − x%)"
+      }
+    },
+    "budgetErrors": {
+      "invalidAccountSize": "Invalid account size",
+      "invalidRiskRatio": "Invalid risk ratio",
+      "riskRatioMin": "Risk ratio must be at least 0.1%",
+      "riskRatioMax": "Risk ratio must not exceed 5%",
+      "invalidEntryPrice": "Invalid entry price",
+      "missingStopPercent": "Missing stop percent",
+      "stopPercentRange": "Stop percent must be between 1% and 10%",
+      "invalidStopLossPrice": "Invalid stop loss price",
+      "entryAboveStop": "Entry must be above stop loss",
+      "positionSizeZero": "Position size is zero under current parameters",
+      "notionalExceedsAccount": "Position notional exceeds account size"
+    },
+    "budgetWarnings": {
+      "riskRatioHigh": "Risk ratio is above 2%"
+    }
   }
 }
