@@ -696,6 +696,47 @@ P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染
 
 **负责人边界**：可由工程侧稳定执行 **脚本 + Spec 归档**（Do/Check 中技术块）；涉及 **GSC 权限、竞品词策略、法务口径** 的 Act 仍以产品/增长确认为准。
 
+### 14.6 与增长/观测管道对齐（借助「入库 + Admin」闭环）
+
+本节说明：**如何把每日入库能力接到 PDCA 的 Check**，以及当前仓库内的**真实情况**。
+
+#### 14.6.1 现状（StockWise monorepo 内已存在的能力）
+
+| 管道 | 实现位置（代码） | 落库 | Admin |
+| --- | --- | --- | --- |
+| **GA4（网站行为）** + **Microsoft Clarity** + **库内激活** | `backend/scripts/daily_growth_digest.py` → `collect_growth_payload()` | `growth_daily_snapshots.payload_json`（含 `ga4`、`clarity`、`internal`） | `/admin/growth` → `/api/admin/growth` |
+
+**不包含（截至本文档修订）**：**Google Search Console**、**Bing Webmaster** 的 organic **impressions/clicks/position/query** 的专用表或 API Job。站内与 Bing 相关的 `scripts/indexnow_sync.py` 属于 **索引提交（IndexNow）**，不是抓取搜索表现报表。
+
+换言之：你说的「每日 GSC/Bing 抓取进库 + Admin」若已在**另一条仓库/私有服务**实现，需在集成时把**读模型的契约**对齐到本节 **14.6.3**，以便 Agent 与消费者（本页 PDCA、`position-budget-seo-check.mjs` 之外的数据检）同源。
+
+#### 14.6.2 两条集成路线（由准到松）
+
+**路线 B · 准则（推荐给 PDCA）：Search 表现专用表**
+
+- **写入**：定时任务（对齐现有 `daily_growth_digest --persist` 节奏或独立 Cron）调用  
+  - GSC：**Search Analytics**（dimensions：`date` + `page`；可选第二层 `query` 存明细表或小样本）  
+  - Bing：**Query / Page / Inbound Links** 等报表中与本站 URL 粒度一致的一组指标（以 Bing Webmaster API 当前能力为准）。
+- **读取**：单独的窄表优于塞进 `growth_daily_snapshots`，避免单行 `payload_json` 无限膨胀且难以按 URL 索引。
+
+推荐的**逻辑主键粒度**（示例，实现时可微调列名）：`report_date`、`source`（`gsc` \| `bing`）、`page_path`（与 canonical 路径一致，如 `/tools/position-budget`）、可选 `query`（仅明细行）。
+
+对 **仓位预算页的 PDCA**：Check 应以 **`page_path = '/tools/position-budget'`** 过滤，对标 `seo-position-budget.ts` canonical path。
+
+**路线 A · 近似（仅作过渡）**：在现有 GA4 pull 里增加 **`pagePath × sessionMedium`（或 filters）**，单独拆出 `organic / organic search` 的 sessions，用于观趋势；**不可替代** GSC 的 impressions/position/query，不得写入 Spec 守门线作为主判据。
+
+#### 14.6.3 Agent（Cursor）如何「为你所用」
+
+满足 **14.6.2 路线 B** 后，建议提供**只读契约**之一（可多选共存）：
+
+1. **HTTP Admin API**：例如 `GET /api/admin/seo-search?path=/tools/position-budget&days=56&sources=gsc,bing`（需在现有 Admin 会话/鉴权模型下保护与 growth 同级别）。Agent 在非生产仓库外无法直接调用带 Cookie 的 Admin，可由人在本地/CI **粘贴 JSON 响应**或由脚本用 **服务端 token** 拉取写入 `reports/seo-position-budget-latest.json`（敏感信息勿入库）。
+2. **受控 SQL 视图**：Turso/SQLite 上 `VIEW v_seo_search_by_path AS ...`，仅限运维只读副本；本地 Agent 在 **有 DB 快照**的沙箱跑一次查询，生成 Markdown 记入 §14.5。
+
+**闭环动作映射**：
+
+- **Check**：`npm run check:position-budget-seo`（技术/HTML） **+** 从 B 表中取近 28/56 天 **impressions/clicks/CTR/position（及 Top queries）**。
+- **Act**：若数据证明 CTR 极低或 queries 漂移，再在 `frontend/src/content/seo-position-budget.ts` / 页面可见文案做小步 Do（§14.4 仍适用「单假设」）。
+
 ---
 
 ## 15. 当前定稿结论
