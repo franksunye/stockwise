@@ -121,6 +121,19 @@ source_docs:
 4. `risk_per_share <= 0` 阻断
 5. `position_size * entry_price > account_size` 阻断
 
+### 5.4 市场上下文增强字段（P0.1）
+
+以下字段用于帮助用户理解“当前价格与常态波动”，不改变 §5.2 的仓位预算计算口径，也不自动替代用户输入的止损或目标位。
+
+| 字段 | 来源 / 口径 | 用途 |
+| --- | --- | --- |
+| `latest_price` | 后台行情快照，当前约 **15 分钟更新一次**；必须随同返回 `as_of` / `updated_at` 等时间戳 | 展示“最新价格（约 15 分钟更新）”，可作为入场价预填候选 |
+| `latest_change_percent` | 同一行情快照中的涨跌幅，缺失时展示为空 | 展示当前涨跌背景，不参与预算计算 |
+| `atr_14` | 基于日线 `high / low / close` 计算 14 日 ATR（True Range 取 `max(high-low, abs(high-prevClose), abs(low-prevClose))`） | 衡量常态单日波动，用于辅助用户判断止损距离是否过窄 |
+| `volatility_bucket` | 基于近 20 或 30 个交易日收盘收益率的已实现波动率分档，初始枚举为 `LOW` / `MED` / `HIGH` | 展示波动风险标签，阈值可随真实样本校准 |
+
+文案约束：前端不得裸写“实时价格”。建议使用“最新价格（约 15 分钟更新）”或“近实时价格 · 约 15 分钟刷新”，并在 UI 中显示更新时间，避免用户误解为逐笔或秒级行情。
+
 ---
 
 ## 6. 账号体系与持久化
@@ -189,9 +202,11 @@ source_docs:
 ### 7.2 页面结构（P0）
 
 1. 顶部：股票信息与预填状态（**代码检索**与 Dashboard 自选池共用 §12.3.1 模块；可选自选快捷入口）
-2. 中部：三种 R 模式参数区
+2. 中部：**止损方式选择** + 对应参数区（内部仍映射三种 `r_mode`，对用户不暴露技术枚举）
 3. 右侧/下方：预算结果卡（1R、仓位、风险提示）
 4. 底部：保存按钮 + 免责声明
+
+P0.1 可在顶部股票信息区增加 **Market Context / 市场上下文** 条，展示最新价、ATR 与波动率分档。该区块只解释行情背景；计算器仍以用户确认后的入场价、止损位、目标位与风险比例为准。
 
 ### 7.3 文案约束
 
@@ -205,6 +220,24 @@ source_docs:
 - “AI 推荐买入 …”
 - “最大胜率 …”
 - “按此操作即可盈利 …”
+
+### 7.4 止损方式 UX（P0）
+
+产品语义上，用户不是在选择“计算模式”，而是在选择“止损如何定义”。因此 UI 必须用交易语义包装 `r_mode`，但数据契约与计算枚举保持不变：
+
+| 内部枚举 | PC 展示名 | Mobile 短标签 | 说明文案 |
+| --- | --- | --- | --- |
+| `system_followed` | `Strategy Stop / 策略止损` | `策略` | `基于策略失效位` |
+| `fixed_stop` | `Price Stop / 价格止损` | `价格` | `手动输入止损价` |
+| `percent_stop` | `Percent Stop / 百分比止损` | `百分比` | `按入场价回撤比例计算` |
+
+交互约束：
+
+1. **PC**：可使用三张 explainable option cards，展示标题 + 一行说明 + 选中态；不要使用 `SYSTEM / FIXED / PCT` 这类技术 tab。
+2. **Mobile**：使用 compact segmented control，只显示短标签；未选中的模式不展示说明。
+3. **渐进解释**：移动端仅在分段控件下方展示当前选中项的一句说明，控制在 12-16 个中文字以内；更长解释进入 `?` tooltip / bottom sheet。
+4. **动态输入**：下方只展示当前止损方式需要的输入框；`percent_stop` 需同步展示计算出的最终止损价。
+5. **结果收口**：结果区统一展示 `Resolved Stop / 最终止损价` 与 `Risk per Share / 每股风险`，让三种方式最终落到同一计算事实。
 
 ---
 
@@ -253,6 +286,14 @@ source_docs:
 
 一句话原则：**偏好可以改，快照只追加；旧快照只能载入、复制、删除/归档，不做原地覆盖。**
 
+### 8.6 市场上下文数据读取（P0.1）
+
+三项市场上下文增强优先复用现有股票数据链路，不新增前端依赖，也不把预算隐私字段写入行情请求：
+
+1. **最新价**：优先复用 `GET /api/stock/batch?symbols=...` 或现有最新行情接口返回的 `price.close`、`change_percent` 与更新时间；UI 必须标注“约 15 分钟更新”。
+2. **ATR / Volatility**：若现有价格历史接口只返回 `close`，P0.1 可扩展该接口返回 `high`、`low`、`close`、`date`、`updated_at`，由前端或共享纯函数计算展示指标。
+3. **隐私边界**：`account_size`、`risk_ratio`、预算结果与快照 ID 不进入行情请求、batch cache key 或预测 SQL；行情上下文与预算持久化保持解耦。
+
 ---
 
 ## 9. 与主系统并轨条件（Exit Criteria）
@@ -275,21 +316,25 @@ source_docs:
 2. 三模式计算 + 服务端偏好
 3. 快照持久化（匿名/登录）
 
-### 10.2 P0.1（快照查看与最小闭环）
+### 10.2 P0.1（快照查看与市场上下文增强）
 
-P0 已经提供保存动作，因此 P0.1 的重点不是继续堆计算能力，而是补足“保存之后如何查看”的闭环：
+P0 已经提供保存动作，因此 P0.1 的重点不是继续堆复杂计算，而是补足“保存之后如何查看”的闭环，并在不改变预算口径的前提下补充最小市场上下文：
 
 1. 新增 **Recent Budgets / 最近预算** 区块，默认展示最近 5-10 条快照。
 2. 每条展示 `symbol`、`entry / stop / target`、`risk_ratio`、`position_size`、`expected_loss`、`r_multiple`、`created_at`。
 3. 支持按 `symbol` 查看历史预算快照。
 4. 支持 **Load as Current Parameters / 载入为当前参数**，但不修改原快照。
 5. 支持删除或归档误存快照；删除能力需保留会话鉴权和 `user_id` 边界。
+6. 增加 **最新价格（约 15 分钟更新）** 展示，包含价格、涨跌幅与更新时间；可作为入场价预填候选，但用户必须可覆盖。
+7. 增加 **ATR14** 展示，使用日线 `high / low / close` 计算，用于辅助判断止损距离是否符合常态波动。
+8. 增加 **Volatility** 分档展示，使用近 20 或 30 个交易日收益率波动率映射为 `LOW` / `MED` / `HIGH`。
 
 P0.1 不做：
 
 1. 不做快照原地编辑。
 2. 不做 realized R / 实际盈亏对比。
 3. 不做复杂交易日志统计。
+4. 不自动根据 ATR 或 Volatility 改写仓位预算结果；若要做动态仓位建议，进入 P1+ 另行定义。
 
 ### 10.3 P1（计算器增强 + 轻集成）
 
@@ -326,6 +371,15 @@ P0.1 不做：
 - [ ] 与 Spec 56 字段口径一致，可并轨
 - [ ] 股票代码检索走 §12.3.1 共享模块（与自选池同行为：防抖、Enter 立即搜、请求可取消），插件内无重复搜索实现
 - [ ] P0.1 前明确快照语义：历史快照不原地编辑，查看/载入/删除或归档按 §8.5 执行
+- [ ] 止损方式 UI 按 §7.4 展示交易语义，PC / mobile 均不暴露 `SYSTEM / FIXED / PCT` 技术标签
+
+### 11.1 验收标准（P0.1）
+
+- [ ] 最近预算区块可展示、按股票过滤，并能把旧快照载入为当前参数但不覆盖原快照
+- [ ] 最新价展示包含价格、涨跌幅与更新时间，文案明确“约 15 分钟更新”
+- [ ] ATR14 基于日线 `high / low / close` 计算，数据不足时降级为空态而非伪造数值
+- [ ] Volatility 分档输出 `LOW` / `MED` / `HIGH`，阈值集中在共享计算函数中，便于后续校准
+- [ ] 市场上下文不写入预算快照的计算字段，不进入 `stock/batch` 缓存键，也不改变 §5.2 的预算结果
 
 ---
 
@@ -437,7 +491,7 @@ Cloud / local 双策略：读写 SQL 放在 `frontend/src/lib/user-position-budg
 
 | 资产 | 职责 |
 | --- | --- |
-| `frontend/src/app/(site)/tools/position-budget/page.tsx` + `layout.tsx`（`LocaleProvider` 包裹，不经 DashboardShell） | PC 插件页：选股、预填、三模式、结果卡、保存；**选股区**挂载 §12.3.1 的 `useStockSymbolSearch` + `StockSymbolSearchField` |
+| `frontend/src/app/(site)/tools/position-budget/page.tsx` + `layout.tsx`（`LocaleProvider` 包裹，不经 DashboardShell） | 插件页：选股、预填、止损方式选择、结果卡、保存；**选股区**挂载 §12.3.1 的 `useStockSymbolSearch` + `StockSymbolSearchField`；止损方式按 §7.4 做 PC / mobile 差异化展示 |
 | `frontend/src/hooks/useStockSymbolSearch.ts` + `frontend/src/components/stock/StockSymbolSearchField.tsx` | 与自选池共用的股票代码检索；插件与 `stock-pool/page.tsx` 唯一实现源 |
 | `frontend/src/lib/position-budget.ts` | `computePositionBudget(input): output` + 模式分支 + 阻断原因枚举 |
 | `frontend/src/hooks/usePositionBudgetPreferences.ts`（可选） | `SWR` key 独立，**不**接入 `useTradeManagementSurface`（Spec 56 §13.3） |
@@ -454,7 +508,25 @@ Cloud / local 双策略：读写 SQL 放在 `frontend/src/lib/user-position-budg
 
 `position_budget_snapshots` 行应能映射到 Spec 56 计划事实（`plan_r_amount`、`plan_position_size`、`plan_r_mode` 等）而不改列语义；P1 写入 `events` 时做字段映射即可。
 
-### 12.9 P0 架构决策记录（按 RFC 50 §11）
+### 12.9 市场上下文增强（P0.1）
+
+P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染预算计算纯函数：
+
+| 资产 | 职责 |
+| --- | --- |
+| `frontend/src/lib/position-budget-market-context.ts`（可新建） | 纯函数计算 `atr_14`、收益率波动率与 `volatility_bucket`；不依赖 React 或请求层 |
+| `frontend/src/lib/position-budget-client.ts` | 扩展行情读取 DTO，接收 `high`、`low`、`close`、`change_percent`、`updated_at` 等字段 |
+| `frontend/src/app/api/stock/prices/history/route.ts`（如需扩展） | 返回计算 ATR 所需的日线字段；保持 `limit` 上限，避免大 payload |
+| `frontend/src/app/(site)/tools/position-budget/page.tsx` | 在股票选中区展示最新价、ATR14、Volatility；入场价仍允许用户覆盖 |
+
+计算与降级规则：
+
+1. `latest_price` 使用后台约 15 分钟刷新的行情快照；若无 `updated_at`，至少展示行情 `date`，并使用“更新时间未知”空态。
+2. `atr_14` 至少需要 15 条可用日线（含前收盘计算 True Range）；不足时展示 `--`，不回退为估算值。
+3. `volatility_bucket` 初始建议使用近 20 或 30 个交易日的收盘收益率标准差映射，阈值集中定义，后续可按 CN/HK/US 样本校准。
+4. 市场上下文只读行情数据，不读取或写入 `account_size`；不得参与 `computePositionBudget()` 的核心输出。
+
+### 12.10 P0 架构决策记录（按 RFC 50 §11）
 
 | 事项 | Impact domain | Stability contract | Decision | Guardrail | Rollback |
 | --- | --- | --- | --- | --- | --- |
@@ -485,6 +557,8 @@ Cloud / local 双策略：读写 SQL 放在 `frontend/src/lib/user-position-budg
 - [ ] 接入 `getCurrentUser()` 保障会话后再请求插件接口
 - [ ] 复用 §12.3.1：`useStockSymbolSearch` + `StockSymbolSearchField`（与 `stock-pool` 同源 UX）
 - [ ] 复用 `GET /api/stock/batch` + `parseTacticalData` 做入场/止损/目标预填（§12.3.2）
+- [ ] 将三种 `r_mode` 包装为“止损方式”：PC 使用 option cards，mobile 使用 compact segmented control + 当前项一句话说明
+- [ ] 结果区统一展示 `Resolved Stop / 最终止损价` 与 `Risk per Share / 每股风险`
 - [ ] 增加“参数异常阻断 + 黄色风险提示 + 免责声明固定可见”
 - [ ] 增加“保存预算快照”动作与成功/失败反馈
 
@@ -496,7 +570,16 @@ Cloud / local 双策略：读写 SQL 放在 `frontend/src/lib/user-position-budg
 - [ ] 验证 `account_size` 不进入 batch 请求或预测查询链路
 - [ ] 走一轮手工验收，逐条勾选本文 §11
 
-### 13.4 并轨准备（P1 前置）
+### 13.4 P0.1 市场上下文增强
+
+- [ ] 扩展或复用行情读取接口，确保最新价返回价格、涨跌幅与更新时间，并在 UI 标注约 15 分钟更新
+- [ ] 扩展价格历史 DTO，补齐 `high`、`low`、`close`、`date` 字段以支持 ATR14
+- [ ] 新增市场上下文纯函数：`computeAtr14()`、`computeRealizedVolatility()`、`bucketVolatility()`
+- [ ] 在股票选中区展示最新价、ATR14、Volatility 三项；数据不足时展示空态，不伪造指标
+- [ ] 增加单测覆盖 ATR、波动率分档与数据不足降级
+- [ ] 手工验证入场价预填可使用最新价，但用户修改后不会被后台刷新覆盖
+
+### 13.5 并轨准备（P1 前置）
 
 - [ ] 形成字段映射文档：`position_budget_snapshots -> events(plan_r_*)`
 - [ ] 保持 `compute` 与 `validation` 纯函数可复用到 `Spec 56` sidecar 组件

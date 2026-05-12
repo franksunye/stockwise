@@ -311,10 +311,13 @@ export default function PositionBudgetToolPage() {
             (['system_followed', 'fixed_stop', 'percent_stop'] as const).map((value) => ({
                 value,
                 label: t(`rMode.${value}.label` as MessageKey<'positionBudget'>),
+                shortLabel: t(`rMode.${value}.shortLabel` as MessageKey<'positionBudget'>),
                 hint: t(`rMode.${value}.hint` as MessageKey<'positionBudget'>),
             })),
         [t],
     );
+    const activeRModeOption = rModeOptions.find((option) => option.value === rMode) ?? rModeOptions[0];
+    const activeRModeHint = activeRModeOption?.hint ?? '';
 
     const stopInputLabel = useMemo(() => {
         if (rMode === 'system_followed') return t('fieldSystemStop');
@@ -816,12 +819,12 @@ export default function PositionBudgetToolPage() {
                         )}
                     </div>
 
-                    {/* R mode segmented control */}
+                    {/* Stop style selector */}
                     <div className="mt-3">
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">
                             {t('stopModeHeading')}
                         </p>
-                        <div className="grid grid-cols-3 gap-2 rounded-2xl border border-white/5 bg-black/20 p-1">
+                        <div className="grid grid-cols-3 gap-1 rounded-2xl border border-white/5 bg-black/20 p-1 sm:hidden">
                             {rModeOptions.map((opt) => {
                                 const active = rMode === opt.value;
                                 return (
@@ -829,17 +832,46 @@ export default function PositionBudgetToolPage() {
                                         key={opt.value}
                                         onClick={() => setRMode(opt.value)}
                                         title={opt.hint}
-                                        className={`min-w-0 px-2.5 py-2 rounded-xl border transition-all active:scale-95 text-center ${
+                                        className={`min-w-0 px-2 py-2 rounded-xl border transition-all active:scale-95 text-center ${
                                             active
                                                 ? 'bg-indigo-500/15 border-indigo-500/40 shadow-[0_0_18px_rgba(99,102,241,0.12)]'
                                                 : 'bg-transparent border-transparent hover:bg-white/5'
                                         }`}
                                     >
                                         <p
-                                            className={`truncate text-[10px] sm:text-xs font-black uppercase tracking-widest ${active ? 'text-indigo-300' : 'text-slate-400'}`}
+                                            className={`truncate text-[10px] font-black uppercase tracking-widest ${active ? 'text-indigo-300' : 'text-slate-400'}`}
+                                        >
+                                            {opt.shortLabel}
+                                        </p>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <p className="mt-2 text-[11px] font-medium leading-relaxed text-slate-500 sm:hidden">
+                            {activeRModeHint}
+                        </p>
+
+                        <div className="hidden sm:grid sm:grid-cols-3 gap-2.5">
+                            {rModeOptions.map((opt) => {
+                                const active = rMode === opt.value;
+                                return (
+                                    <button
+                                        key={opt.value}
+                                        onClick={() => setRMode(opt.value)}
+                                        className={`min-w-0 rounded-2xl border p-3 text-left transition-all active:scale-[0.98] ${
+                                            active
+                                                ? 'bg-indigo-500/15 border-indigo-500/40 shadow-[0_0_20px_rgba(99,102,241,0.14)]'
+                                                : 'bg-black/20 border-white/5 hover:bg-white/[0.04] hover:border-white/10'
+                                        }`}
+                                    >
+                                        <span
+                                            className={`block text-xs font-black uppercase tracking-widest ${active ? 'text-indigo-300' : 'text-slate-300'}`}
                                         >
                                             {opt.label}
-                                        </p>
+                                        </span>
+                                        <span className="mt-1.5 block text-[10px] font-medium leading-relaxed text-slate-500">
+                                            {opt.hint}
+                                        </span>
                                     </button>
                                 );
                             })}
@@ -915,13 +947,13 @@ export default function PositionBudgetToolPage() {
                                 tone="risk"
                             />
                             <ResultCell
-                                label={t('resultExposure')}
-                                value={`${fmt(budget.accountExposurePercent, 2, locale)}%`}
-                                tone={budget.accountExposurePercent > 30 ? 'warning' : 'primary'}
+                                label={t('resultRiskPerShare')}
+                                value={fmt(budget.riskPerShare, 2, locale)}
+                                tone="primary"
                             />
                             <ResultCell
-                                label={t('resultPositionValue')}
-                                value={fmt(budget.positionValue, 2, locale)}
+                                label={t('resultStop')}
+                                value={fmt(budget.resolvedStopLossPrice, 2, locale)}
                             />
                             <ResultCell
                                 label={t('resultRMultiple')}

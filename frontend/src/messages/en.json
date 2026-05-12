@@ -743,8 +743,8 @@
     "collapse": "Collapse",
     "stopModeHeading": "Stop style",
     "fieldStopPct": "Stop distance (%)",
-    "fieldSystemStop": "System stop",
-    "fieldFixedStop": "Fixed stop price",
+    "fieldSystemStop": "Strategy stop price",
+    "fieldFixedStop": "Stop price",
     "statusOk": "OK",
     "statusIncomplete": "INCOMPLETE",
     "loadingPreferences": "Loading preferences...",
@@ -756,7 +756,7 @@
     "resultExpectedLoss": "Expected loss",
     "resultPositionValue": "Position Value",
     "resultExposure": "Exposure",
-    "resultStop": "Stop price",
+    "resultStop": "Resolved stop",
     "resultRMultiple": "R-multiple",
     "sharesUnit": "Shares",
     "sharesUnitCompact": "shares",
@@ -790,16 +790,19 @@
     "errSaveGeneric": "Save failed. Try again.",
     "rMode": {
       "system_followed": {
-        "label": "SYSTEM",
-        "hint": "Use the dossier stop level"
+        "label": "Strategy Stop",
+        "shortLabel": "Strategy",
+        "hint": "Based on strategy invalidation level"
       },
       "fixed_stop": {
-        "label": "FIXED",
-        "hint": "Set a stop price"
+        "label": "Price Stop",
+        "shortLabel": "Price",
+        "hint": "Manual invalidation price"
       },
       "percent_stop": {
-        "label": "PCT",
-        "hint": "Entry × (1 − x%)"
+        "label": "Percent Stop",
+        "shortLabel": "Percent",
+        "hint": "Relative distance from entry"
       }
     },
     "budgetErrors": {

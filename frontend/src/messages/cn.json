@@ -742,9 +742,9 @@
     "expand": "展开",
     "collapse": "收起",
     "stopModeHeading": "止损方式",
-    "fieldStopPct": "百分比止损（%）",
-    "fieldSystemStop": "系统止损位",
-    "fieldFixedStop": "固定止损价",
+    "fieldStopPct": "止损幅度（%）",
+    "fieldSystemStop": "策略止损价",
+    "fieldFixedStop": "止损价格",
     "statusOk": "OK",
     "statusIncomplete": "待补完",
     "loadingPreferences": "正在加载用户偏好...",
@@ -756,7 +756,7 @@
     "resultExpectedLoss": "预计亏损",
     "resultPositionValue": "仓位市值",
     "resultExposure": "账户暴露",
-    "resultStop": "止损价",
+    "resultStop": "最终止损价",
     "resultRMultiple": "R 倍数",
     "sharesUnit": "股",
     "sharesUnitCompact": "股",
@@ -790,16 +790,19 @@
     "errSaveGeneric": "保存失败，请稍后重试",
     "rMode": {
       "system_followed": {
-        "label": "系统位",
-        "hint": "跟随档案给出的止损"
+        "label": "策略止损",
+        "shortLabel": "策略",
+        "hint": "基于策略失效位"
       },
       "fixed_stop": {
-        "label": "固定价",
-        "hint": "指定一个止损价"
+        "label": "价格止损",
+        "shortLabel": "价格",
+        "hint": "手动输入止损价"
       },
       "percent_stop": {
         "label": "百分比",
-        "hint": "入场价 × (1−x%)"
+        "shortLabel": "百分比",
+        "hint": "按入场价回撤比例计算"
       }
     },
     "budgetErrors": {
