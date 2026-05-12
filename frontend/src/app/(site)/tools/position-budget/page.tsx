@@ -134,25 +134,6 @@ function snapshotRMultiple(snapshot: PositionBudgetSnapshot): number | null {
     return Number.isFinite(multiple) ? multiple : null;
 }
 
-function snapshotPositionValue(snapshot: PositionBudgetSnapshot): number {
-    return snapshot.position_size * snapshot.entry_price;
-}
-
-function snapshotExposurePercent(snapshot: PositionBudgetSnapshot): number {
-    if (snapshot.account_size <= 0) return 0;
-    return (snapshotPositionValue(snapshot) / snapshot.account_size) * 100;
-}
-
-function snapshotStatusTone(snapshot: PositionBudgetSnapshot): 'valid' | 'warning' | 'invalid' {
-    const exposure = snapshotExposurePercent(snapshot);
-    const multiple = snapshotRMultiple(snapshot);
-    if (exposure > 100 || snapshot.position_size <= 0) return 'invalid';
-    if (exposure > 30 || (multiple !== null && multiple < 2) || snapshot.risk_ratio > 0.02) {
-        return 'warning';
-    }
-    return 'valid';
-}
-
 const BUDGET_ERROR_KEYS: Record<string, MessageKey<'positionBudget'>> = {
     'Invalid account size': 'budgetErrors.invalidAccountSize',
     'Invalid risk ratio': 'budgetErrors.invalidRiskRatio',
@@ -1149,7 +1130,6 @@ export default function PositionBudgetToolPage() {
                         <div className="-mx-4 overflow-x-auto scroll-px-4 px-4 pb-2 snap-x snap-mandatory [-webkit-overflow-scrolling:touch] sm:snap-none sm:mx-0 sm:scroll-px-0 sm:px-0">
                             <div className="flex gap-3 sm:grid sm:grid-cols-3">
                             {snapshots.map((snapshot) => {
-                                const tone = snapshotStatusTone(snapshot);
                                 const rMultiple = snapshotRMultiple(snapshot);
                                 const rMultipleText = rMultiple === null ? '—' : `${fmt(rMultiple, 2, locale)}R`;
                                 const setupHeading = snapshot.setup_type
@@ -1178,7 +1158,7 @@ export default function PositionBudgetToolPage() {
                                         aria-label={snapshotAriaPieces.join('. ')}
                                     >
                                         <div className="flex items-start justify-between gap-3">
-                                            <div className="min-w-0">
+                                            <div className="min-w-0 flex-1">
                                                 <p className="truncate text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
                                                     {setupHeading}
                                                 </p>
@@ -1186,16 +1166,14 @@ export default function PositionBudgetToolPage() {
                                                     {snapshot.symbol}
                                                 </p>
                                             </div>
-                                            <span className={`h-2 w-2 shrink-0 rounded-full ${snapshotDotClass(tone)}`} />
-                                        </div>
-
-                                        <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">
-                                                {t('snapshotStopType')}
-                                            </span>
-                                            <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[10px] font-bold tabular-nums text-slate-300">
-                                                {stopModeLabel}
-                                            </span>
+                                            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 pt-0.5">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">
+                                                    {t('snapshotStopType')}
+                                                </span>
+                                                <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[10px] font-bold tabular-nums text-slate-300">
+                                                    {stopModeLabel}
+                                                </span>
+                                            </div>
                                         </div>
 
                                         <div className="mt-4 flex items-end justify-between gap-4">
@@ -1454,10 +1432,4 @@ function checkStatusClass(status: 'PASS' | 'WARN' | 'FAIL' | 'PENDING'): string 
     if (status === 'WARN') return 'text-amber-300';
     if (status === 'FAIL') return 'text-rose-300';
     return 'text-slate-400';
-}
-
-function snapshotDotClass(tone: 'valid' | 'warning' | 'invalid'): string {
-    if (tone === 'valid') return 'bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.35)]';
-    if (tone === 'warning') return 'bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.35)]';
-    return 'bg-rose-400 shadow-[0_0_12px_rgba(251,113,133,0.35)]';
 }
