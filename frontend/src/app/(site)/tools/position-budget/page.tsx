@@ -742,9 +742,6 @@ export default function PositionBudgetToolPage() {
                                                 {fmt(selected.lastClose, 2, locale)}
                                             </span>
                                         ) : null}
-                                        <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-emerald-300">
-                                            {t('directionLong')}
-                                        </span>
                                     </p>
                                 </div>
                             </div>
@@ -831,9 +828,6 @@ export default function PositionBudgetToolPage() {
                         <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
                             {t('riskModelInputs')}
                         </h2>
-                        <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                            {t('directionLong')}
-                        </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
@@ -1192,12 +1186,7 @@ export default function PositionBudgetToolPage() {
                                                     {snapshot.symbol}
                                                 </p>
                                             </div>
-                                            <div className="flex shrink-0 items-center gap-2">
-                                                <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-emerald-300">
-                                                    {t('directionLong')}
-                                                </span>
-                                                <span className={`h-2 w-2 rounded-full ${snapshotDotClass(tone)}`} />
-                                            </div>
+                                            <span className={`h-2 w-2 shrink-0 rounded-full ${snapshotDotClass(tone)}`} />
                                         </div>
 
                                         <div className="mt-2.5 flex flex-wrap items-center gap-2">

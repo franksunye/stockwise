@@ -783,7 +783,6 @@
     "disclaimer": "本工具为风险预算辅助工具，所有计算结果基于您输入的数据与系统参数。不构成投资建议，不保证盈利。市场有风险，投资需谨慎。",
     "saveBusy": "保存中...",
     "saveCta": "保存快照",
-    "directionLong": "做多",
     "marketFallback": "市场",
     "errLoadStockProfile": "加载股票档案失败，请稍后重试",
     "infoNoTactical": "该股票暂无可用的战术档案，请手动填入入场价与止损位",

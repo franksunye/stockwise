@@ -783,7 +783,6 @@
     "disclaimer": "This tool estimates risk budget only. Results depend on your inputs and system parameters. Not investment advice. Markets involve risk.",
     "saveBusy": "Saving...",
     "saveCta": "Save Snapshot",
-    "directionLong": "LONG",
     "marketFallback": "MARKET",
     "errLoadStockProfile": "Could not load stock profile. Try again.",
     "infoNoTactical": "No tactical profile for this symbol. Enter entry and stop manually.",
