@@ -1159,6 +1159,9 @@ export default function PositionBudgetToolPage() {
                                     ...(snapshot.setup_type
                                         ? [setupTypeLabelsShort[snapshot.setup_type] ?? snapshot.setup_type]
                                         : []),
+                                    `${t('snapshotEntryShort')} ${fmt(snapshot.entry_price, 2, locale)}`,
+                                    `${t('snapshotStopShort')} ${fmt(snapshot.stop_loss_price, 2, locale)}`,
+                                    `${t('snapshotTargetShort')} ${fmt(snapshot.target_price, 2, locale)}`,
                                     `${fmt(snapshot.position_size, 0, locale)} ${t('sharesUnitCompact')}`,
                                     `${t('snapshotRisk')} ${fmt(snapshot.expected_loss, 2, locale)}`,
                                     `${t('snapshotCreated')} ${fmtRelativeTime(snapshot.created_at, locale)}`,
@@ -1188,6 +1191,33 @@ export default function PositionBudgetToolPage() {
                                                 <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[10px] font-bold tabular-nums text-slate-300">
                                                     {stopModeLabel}
                                                 </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-3 grid grid-cols-3 gap-x-2 gap-y-2 text-left border-t border-white/5 pt-3">
+                                            <div className="min-w-0">
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-600">
+                                                    {t('snapshotEntryShort')}
+                                                </p>
+                                                <p className="mt-0.5 mono text-[11px] font-bold tabular-nums text-slate-200 truncate">
+                                                    {fmt(snapshot.entry_price, 2, locale)}
+                                                </p>
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-600">
+                                                    {t('snapshotStopShort')}
+                                                </p>
+                                                <p className="mt-0.5 mono text-[11px] font-bold tabular-nums text-slate-200 truncate">
+                                                    {fmt(snapshot.stop_loss_price, 2, locale)}
+                                                </p>
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-600">
+                                                    {t('snapshotTargetShort')}
+                                                </p>
+                                                <p className="mt-0.5 mono text-[11px] font-bold tabular-nums text-slate-200 truncate">
+                                                    {fmt(snapshot.target_price, 2, locale)}
+                                                </p>
                                             </div>
                                         </div>
 
