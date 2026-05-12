@@ -336,9 +336,12 @@ export default function PositionBudgetToolPage() {
                     historyLimit: '1',
                     contentLocale: stockLocale,
                 });
-                const response = await fetch(`/api/stock/batch?${qs.toString()}`, {
-                    signal: controller.signal,
-                });
+                const [response, identity] = await Promise.all([
+                    fetch(`/api/stock/batch?${qs.toString()}`, {
+                        signal: controller.signal,
+                    }),
+                    fetchPositionBudgetStockIdentity(target.symbol),
+                ]);
                 const data = await response.json().catch(() => ({}));
                 if (requestSeq !== prefillSeqRef.current) return;
                 if (!response.ok) {
@@ -375,9 +378,9 @@ export default function PositionBudgetToolPage() {
                 setSelected((prev) => ({
                     ...(prev || target),
                     symbol: target.symbol,
-                    name: stock?.name ?? prev?.name ?? target.name,
-                    name_en: stock?.name_en ?? prev?.name_en ?? target.name_en ?? null,
-                    market: stock?.market ?? prev?.market ?? target.market,
+                    name: stock?.name ?? identity?.name ?? prev?.name ?? target.name,
+                    name_en: stock?.name_en ?? identity?.name_en ?? prev?.name_en ?? target.name_en ?? null,
+                    market: stock?.market ?? identity?.market ?? prev?.market ?? target.market,
                     lastClose: closePrice,
                 }));
 
@@ -520,6 +523,15 @@ export default function PositionBudgetToolPage() {
 
     const watchlistChips = useMemo(() => watchlist.slice(0, 8), [watchlist]);
     const selectedBadge = selected ? getMarketBadge(selected.market, 'compact', locale) : null;
+    const tickerWithMarketSuffix = useMemo(() => {
+        if (!selected) return '';
+        const suffix = (selectedBadge?.suffix ?? '').trim();
+        const sym = selected.symbol.trim().toUpperCase();
+        if (!suffix) return sym;
+        const su = suffix.toUpperCase();
+        if (sym.endsWith(su)) return sym;
+        return `${sym}${suffix}`;
+    }, [selected, selectedBadge]);
     const stopInputValue = rMode === 'system_followed' ? systemStopLossPrice : fixedStopLossPrice;
     const canSave = bootstrapped && !!selected && budget.ok && !saving;
     const verdict = useMemo(() => buildPositionBudgetVerdict(budget), [budget]);
@@ -709,21 +721,24 @@ export default function PositionBudgetToolPage() {
                                     {selectedBadge?.label}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-lg sm:text-xl font-black italic tracking-tighter text-white truncate">
-                                        {selected.symbol}
-                                        <span className="ml-2 text-xs not-italic tracking-normal text-slate-500">
-                                            {selectedDisplayName === selected.symbol ? '' : selectedDisplayName}
+                                    <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1 sm:flex-nowrap sm:gap-y-0">
+                                        <span className="shrink-0 whitespace-nowrap text-lg sm:text-xl font-black italic tracking-tighter text-white">
+                                            {tickerWithMarketSuffix}
                                         </span>
-                                    </p>
-                                    <p className="text-[10px] text-slate-500 mono uppercase tracking-widest mt-0.5 flex flex-wrap items-center gap-2">
-                                        <span>{selectedBadge?.suffix || selected.market || t('marketFallback')}</span>
-                                        {selected.lastClose ? (
-                                            <span className="text-slate-400">
-                                                {t('selectedClose')}{' '}
-                                                {fmt(selected.lastClose, 2, locale)}
+                                        {selectedDisplayName.trim().toUpperCase() !==
+                                            selected.symbol.trim().toUpperCase() &&
+                                        selectedDisplayName.trim().length ? (
+                                            <span className="min-w-0 flex-1 truncate text-xs uppercase not-italic tracking-normal text-slate-500">
+                                                {selectedDisplayName}
                                             </span>
                                         ) : null}
-                                    </p>
+                                    </div>
+                                    {selected.lastClose ? (
+                                        <p className="mt-1 text-[10px] mono uppercase tracking-widest text-slate-400">
+                                            {t('selectedClose')}{' '}
+                                            {fmt(selected.lastClose, 2, locale)}
+                                        </p>
+                                    ) : null}
                                 </div>
                             </div>
                             <MiniTrendSparkline
