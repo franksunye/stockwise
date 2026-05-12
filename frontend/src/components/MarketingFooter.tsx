@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { POSITION_BUDGET_CANONICAL_PATH } from '@/content/seo-position-budget';
 import { type PublicLocale, localizePublicPath } from '@/lib/public-i18n';
 
 export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLocale }) {
@@ -86,7 +87,8 @@ export default function MarketingFooter({ locale = 'en' }: { locale?: PublicLoca
         { href: `${localizedHome}#faq`, label: currentLabels.faq },
         { href: localizePublicPath('/support', locale), label: currentLabels.support },
         {
-          href: 'https://app.ziso.cc/tools/position-budget',
+          /** Canonical landing on marketing apex (matches sitemap + JSON‑LD); not app.ziso.cc. */
+          href: POSITION_BUDGET_CANONICAL_PATH,
           label: currentLabels.positionBudget,
         },
         ...(locale === 'en' ? [{ href: '/paper-portfolio-lab', label: 'Paper Portfolio Lab' }] : []),
