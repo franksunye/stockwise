@@ -804,7 +804,7 @@ P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染
 }
 ```
 
-**定时作业（已实现）**：`backend/scripts/daily_seo_search_ingest.py` — 与 **`daily_growth_digest.py --persist`** 同范式：`get_connection()`、`CREATE TABLE IF NOT EXISTS`、`--persist`。在 GitHub Actions 上见 **`.github/workflows/daily_seo_search_snapshot.yml`**（需在仓库 Secrets 增加 **`GSC_SITE_SCOPE`**，且同一服务账号须在 GSC「用户」中具备读权限）；默认复用 **`GA4_SERVICE_ACCOUNT_JSON` → `backend/keys/…json`**（JWT Scope 换成 **Search Console**，与 GA4 不同）。命令示例：`PYTHONPATH=. python backend/scripts/daily_seo_search_ingest.py --persist`（可先不加 `--persist` 看抓取行数）。
+**定时作业（已实现）**：`backend/scripts/daily_seo_search_ingest.py` — 与 **`daily_growth_digest.py --persist`** 同范式：`get_connection()`、`CREATE TABLE IF NOT EXISTS`、`--persist`。在 GitHub Actions 上见 **`.github/workflows/daily_seo_search_snapshot.yml`**（仓库 Secrets 设 **`GSC_SITE_SCOPE`** = Search Console「设置」里的**属性网址字符串**，须与控制台中 **一字不差**：常见 **`https://你的域名/`**（URL 前缀）或 **`sc-domain:域名`**）；同一服务账号须在 GSC「用户」中可读。**403** 多为属性串与控制台不一致或 SA 未加入。默认复用 **`GA4_SERVICE_ACCOUNT_JSON` → `backend/keys/…json`**（JWT scope 含 **Search Console**）。示例：`PYTHONPATH=. python backend/scripts/daily_seo_search_ingest.py`（先不加 `--persist` 可看抓取行数）。
 
 ---
 
