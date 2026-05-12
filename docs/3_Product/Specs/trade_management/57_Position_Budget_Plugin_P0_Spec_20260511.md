@@ -4,11 +4,12 @@ doc_id: "spec-position-budget-plugin-p0-20260511"
 doc_domain: "product"
 doc_status: "active"
 owner: "founder"
-last_reviewed_at: "2026-05-11"
+last_reviewed_at: "2026-05-12"
 summary: "定义仓位预算能力的插件验证版：独立 PC 页面先行，以最小耦合验证 1R 预算使用价值，并在数据契约、持久化与并轨条件上与 Spec 56 保持一致；选股侧与 Dashboard 自选池共用 `useStockSymbolSearch` + `StockSymbolSearchField`，避免重复实现。"
 source_docs:
   - "docs/3_Product/Specs/trade_management/56_Risk_Management_R_Multiple_Calculator_Spec_20260509.md"
   - "docs/1_Engineering/50_Plugin_Architecture_And_Extensibility_RFC_20260511.md"
+  - "frontend/src/content/seo-position-budget.ts"
 ---
 
 # 功能规格说明书：仓位预算插件版（Position Budget Plugin P0）(Spec 57)
@@ -587,7 +588,111 @@ P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染
 
 ---
 
-## 14. 当前定稿结论
+## 14. SEO / GEO 运营目标与 PDCA 闭环
+
+本小节定义 **插件页 canonical 路径：`/tools/position-budget`** 的搜寻与生成式检索侧运营准则。技术实现已与全站 `buildPageMetadata`、`rootMetadata`、`sitemap` 对齐，本节负责 **目标—监测—复盘—改版** 的闭环，避免与该页相关的 SEO/GEO 工作与主站框架脱节。
+
+### 14.1 在全站 SEO / GEO 框架中的位置（不变量）
+
+| 层级 | 责任 | 本页对应 |
+| --- | --- | --- |
+| 框架 | canonical、sitemap、`metadataBase`、`root` 级 OG/Twitter 默认 | `(site)` 继承 `frontend/src/app/root-layout-config.ts` |
+| 协议 | `buildPageMetadata`、`localizePublicPath` 约束 | **`alternateLocales`** 仅用真实存在的路由；该页仅为 locale-neutral **`/tools/position-budget`**，不捏造 `/cn/tools/…` |
+| 页面 | title / description / keywords / JSON-LD | `frontend/src/content/seo-position-budget.ts` + `frontend/src/app/(site)/tools/position-budget/layout.tsx` |
+| 发现 | 收录 URL 列表 | `frontend/src/app/sitemap.ts` 中 `tools/position-budget` 条目 |
+
+**口径**：本条所称 **GEO** = 跨境/双语意图与生成式检索中的**可被正确复述、少幻觉、可追溯 canonical**（与「地缘政治」无关）；不改变产品合规表述与免责声明边界。
+
+### 14.2 页面级运营目标（建议 12 个月内滚动修订）
+
+以下为 **定性 + 定量** 组合示例，可按实际流量在每季 OKR 里改数字，但 **守门线** 建议常年保留。
+
+**A. 守门线（必须持续满足）**
+
+1. Metadata、JSON-LD、可见 UI Disclaimer 与真实能力一致，**不承诺收益、不弱化风险**。
+2. Canonical **唯一**：`https://ziso.cc/tools/position-budget`（与 `NEXT_PUBLIC_SITE_URL` / 品牌域名策略一致）。
+3. 若全站另行约定 **`app.ziso.cc` vs `ziso.cc` 主次关系**，本页只做 **跳转/别名治理的跟随项**，不在本规格内单列一套规则。
+
+**B. 定量目标（SEO，示例占位）**
+
+| 指标（GSC/Bing Webmaster） | 说明 | 季度检查 |
+| --- | --- | --- |
+| 索引状态 | 该 URL 「已编入索引」、无外因长期排除 | 是/否 |
+| 展示 / 点击 | 针对预先维护的 query 表的合计或 Top N | 环比增长或区间目标由增长负责人填 |
+| 点击率 | title/description A/B 后对比 | 与历史周期比 |
+
+**C. GEO / 复述质量目标（抽样，示例）**
+
+- 固定 **中英文问法清单**（与 §14.3 同源），每季度至少完成 **一轮**结构化记录：**引擎 / 是否有引用 canonical / 摘要事实错误项 / 合规风险项**。
+- **目标**：对工具能力描述 **不出现与 Disclaimer 相悖的承诺**；出现明显幻觉时 **Act 阶段必须进入文案或 FAQ 修订**（见 §14.4）。
+
+### 14.3 指标体系与数据源
+
+**1）关键词与问法矩阵（负责人维护，建议外置表格）**
+
+列建议：`语言` | `意图（信息/工具）` | `核心词或问法` | `当前备注` | `关联代码/文案位置`。
+
+- 须与 `seo-position-budget.ts` 的 `keywords` **定期对账**（季度一次），避免页面 meta 与矩阵严重漂移。
+- 中英 + 市场修饰（港/美/A）仅用于**真实支持范围**的表述，与 §3 边界一致。
+
+**2）监测数据源（与全站一致）**
+
+| 数据源 | 用途 | 频率 |
+| --- | --- | --- |
+| Google Search Console | 展示、点击、查询词、索引、体验 | 月度 |
+| Bing Webmaster | 补充搜索引擎可见度 | 月度 |
+| 站点 `sitemap.xml` | 确认 URL 仍被收录集合引用 | 发版后 / 季度 |
+| 站点分析（若已部署 GA4 等） | 进入该 path 后的行为 proxy | 月度（可选） |
+| GEO 抽样表 | 生成式答案是否引用、事实一致性 | 月度 |
+
+### 14.4 PDCA 闭环工作方法
+
+**总则**：单次改版 **只引入一个主导假设**，观测窗口建议 **不少于 14 天（自然检索）**，重大算法波动期允许延长；记录沉淀在 **`docs/` 可追溯位置或团队知识库**，至少保留 **最近一次 Act 的输出链接**在本规格附录或周报。
+
+#### Plan（计划）
+
+1. **选焦点**：从上期 Check 或未达标项中选 1～2 条（如新 query、CTR 偏低、GEO 复述错误）。
+2. **立下假设**：例 —「补强 description 中『快照/三市场』信息后，特定 query 点击率提升」。
+3. **定义动作边界**：仅能改 **`seo-position-budget.ts`** 文案、`layout` metadata、或页面内 **与检索一致的可见说明段落**（须保持克制与设计规范）；牵涉 **主域与子域 canonical** 的须走全站 SEO 工单，不归本页单独闭环。
+4. **输出**：记入周期表：**负责人、截止日期、假设、成功判据（可量化或定性枚举）**。
+
+#### Do（执行）
+
+1. 按仓库规范提交 PR：**代码路径 + Spec 本节或附录「迭代记录」中一句话说明假设**。
+2. 发布后 **记录发布日期/commit**（便于对照 GSC 曲线）。
+
+#### Check（检查）
+
+1. **GSC**：该 URL 的查询词分布、CTR、抓取/索引异常。
+2. **Bing**：同步快速扫一眼。
+3. **GEO 抽样表**：跑固定问法，记录是否引用、错点类型（事实/合规/品牌）。
+4. **对照判据**：未达成则进入 Act；达成则沉淀为 **新基线**。
+
+#### Act（处理）
+
+1. **保留**：假设成立 → 更新关键词矩阵与（如需要）`keywords` meta；在迭代记录表记一行「已采纳」。
+2. **回滚或迭代**：不成立 → 回滚 PR 或发起 **更小粒度**的下一轮 Plan（避免同周期多变量）。
+3. **上升**：若问题来自全站（重复收录、错误 canonical、子域分流），**关闭本页单点循环**，转交全站 SEO 治理项并在此规格 **记录工单编号/结论链接**。
+
+**建议节奏**
+
+| 周期 | 动作 |
+| --- | --- |
+| 每月 | 完成一轮 **Check** 数据拉取 + GEO 抽样（可轻量） |
+| 每季 | 更新 §14.2 数字目标、关键词矩阵与 `seo-position-budget` 对账；必要时开 **Plan** |
+| 每次发版涉及该页 | Do 后 **7 日内**做一次快速 Check（索引、异常抓取） |
+
+### 14.5 迭代记录（模板）
+
+在团队知识库或下表维护；亦可将链接写回本文。
+
+| 日期 | 周期 | Plan 摘要 | Do（PR/版本） | Check 结论 | Act |
+| --- | --- | --- | --- | --- | --- |
+| YYYY-MM-DD | 例：2026 Q2 |  |  |  |  |
+
+---
+
+## 15. 当前定稿结论
 
 **先做插件，不是偏离主系统，而是为主系统降低风险。**
 
