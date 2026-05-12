@@ -705,10 +705,11 @@ P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染
 | 管道 | 实现位置（代码） | 落库 | Admin |
 | --- | --- | --- | --- |
 | **GA4（网站行为）** + **Microsoft Clarity** + **库内激活** | `backend/scripts/daily_growth_digest.py` → `collect_growth_payload()` | `growth_daily_snapshots.payload_json`（含 `ga4`、`clarity`、`internal`） | `/admin/growth` → `/api/admin/growth` |
+| **GSC / Bing（搜索表现｜Organic）** · 入库 + Admin（与 GA4 **分列**，避免 `payload_json` 膨胀） | `frontend/src/lib/seo-search-performance.ts`：`ensureSeoSearchPerformanceSchema` / upsert | **表** `seo_search_performance`（见 **14.6.4**） | **`GET` / `POST`** `/api/admin/seo-search`（与 growth **同级** Admin 鉴权）；增长看板 **`/admin/growth`** 底部提供只读预览（调用 `GET`） |
 
-**不包含（截至本文档修订）**：**Google Search Console**、**Bing Webmaster** 的 organic **impressions/clicks/position/query** 的专用表或 API Job。站内与 Bing 相关的 `scripts/indexnow_sync.py` 属于 **索引提交（IndexNow）**，不是抓取搜索表现报表。
+**不含（仍然成立）**：`daily_growth_digest` **不写** `seo_search_performance`。**IndexNow**（`scripts/indexnow_sync.py`）仍是索引提交，**不是** impressions/CTR/position 报表。**外部定时任务**（Python/cron/systemd）从 GSC/Bing API 拉数后须 **UPSERT** 到上表或通过 **`POST`** 回填（任选其一）。
 
-换言之：你说的「每日 GSC/Bing 抓取进库 + Admin」若已在**另一条仓库/私有服务**实现，需在集成时把**读模型的契约**对齐到本节 **14.6.3**，以便 Agent 与消费者（本页 PDCA、`position-budget-seo-check.mjs` 之外的数据检）同源。
+若「每日 GSC/Bing」已在 **私有服务** 入库，请将 **写入侧**对齐 **14.6.4** 主键与 **CTR ∈ [0,1]** 小数约定，读写即与站内 Admin / Agent **同源**。
 
 #### 14.6.2 两条集成路线（由准到松）
 
@@ -719,18 +720,93 @@ P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染
   - Bing：**Query / Page / Inbound Links** 等报表中与本站 URL 粒度一致的一组指标（以 Bing Webmaster API 当前能力为准）。
 - **读取**：单独的窄表优于塞进 `growth_daily_snapshots`，避免单行 `payload_json` 无限膨胀且难以按 URL 索引。
 
-推荐的**逻辑主键粒度**（示例，实现时可微调列名）：`report_date`、`source`（`gsc` \| `bing`）、`page_path`（与 canonical 路径一致，如 `/tools/position-budget`）、可选 `query`（仅明细行）。
+**本仓库已实现**的更细粒度见 **§14.6.4**（同一 `page_path` 下允许多个 `site_scope`，例如多国 Webmaster API 返回值）。
 
-对 **仓位预算页的 PDCA**：Check 应以 **`page_path = '/tools/position-budget'`** 过滤，对标 `seo-position-budget.ts` canonical path。
+对 **仓位预算页的 PDCA**：Check 仍以 **`page_path == '/tools/position-budget'`**（canonical，无尾斜杠）为主线，对齐 `frontend/src/content/seo-position-budget.ts`。
 
 **路线 A · 近似（仅作过渡）**：在现有 GA4 pull 里增加 **`pagePath × sessionMedium`（或 filters）**，单独拆出 `organic / organic search` 的 sessions，用于观趋势；**不可替代** GSC 的 impressions/position/query，不得写入 Spec 守门线作为主判据。
 
 #### 14.6.3 Agent（Cursor）如何「为你所用」
 
-满足 **14.6.2 路线 B** 后，建议提供**只读契约**之一（可多选共存）：
+满足 **路线 B（14.6.2）** 后，**只读契约**可与 **§14.6.4** 并存：
 
-1. **HTTP Admin API**：例如 `GET /api/admin/seo-search?path=/tools/position-budget&days=56&sources=gsc,bing`（需在现有 Admin 会话/鉴权模型下保护与 growth 同级别）。Agent 在非生产仓库外无法直接调用带 Cookie 的 Admin，可由人在本地/CI **粘贴 JSON 响应**或由脚本用 **服务端 token** 拉取写入 `reports/seo-position-budget-latest.json`（敏感信息勿入库）。
-2. **受控 SQL 视图**：Turso/SQLite 上 `VIEW v_seo_search_by_path AS ...`，仅限运维只读副本；本地 Agent 在 **有 DB 快照**的沙箱跑一次查询，生成 Markdown 记入 §14.5。
+1. **HTTP Admin GET**：例如 `GET /api/admin/seo-search?path=/tools/position-budget&days=56&sources=gsc,bing&query_limit=120`（与 **`/api/admin/growth`** 同级鉴权：`requireAdminAuth`）。Agent **无法在生产外带 Cookie 直连** Admin 时，由人在本地/CI **导出 JSON**，或离线作业写 **快照文件** —— 注意不要提交密钥与可识别用户数据。
+2. **Turso/SQLite 直连（只读）**：对有权限的运维库跑 `seo_search_performance` WHERE `page_path`；本地快照沙箱可把结果写入 §14.5 迭代表。
+
+#### 14.6.4 本仓库：`seo_search_performance` · API · 写入契约
+
+**物理表**：`seo_search_performance`（由 `ensureSeoSearchPerformanceSchema` 确保存在）
+
+| 字段 | 说明 |
+| --- | --- |
+| `report_date` | `TEXT`，`YYYY-MM-DD`（对齐 Search Analytics **`date`** 维度语义） |
+| `source` | `gsc` \| `bing` |
+| `granularity` | `page`：URL 聚合行（**无**单独 query）；`query`：query × page 明细行，`search_query` **非空**（经 **lower + trim**，空串禁止） |
+| `site_scope` | GSC/Bing **站点上下文**的稳定标识（示例：域名级 property、或 API 返回站点 URL）；**空**则入库管线记为字面 `unset` |
+| `page_path` | **pathname only**，`/tools/position-budget` 形式（与 **`normalizeCanonicalPath`** & `seo-position-budget.ts` 一致）；含完整 URL 的 payload 会先被规范化为 pathname |
+| `search_query` | `page` 行必须为 `''`；`query` 行 **非空** |
+| `impressions`、`clicks` | 非负整数 |
+| **`ctr`** | **`REAL`**，**[0, 1]** 区间内的小数，与 Google Search Analytics **fraction** 一致；Bing 若为百分比请先除以再入库 |
+| `position` | 平均排名的数值表示；加权平均或由上游汇总；可为 `NULL` |
+| `ingest_run_id` \| `raw_json` | 可选：`ingest_run_id` 关联一次离线批，`raw_json` 存单行原始 JSON |
+
+**主键**：`PRIMARY KEY(report_date, source, granularity, site_scope, page_path, search_query)` — **`ON CONFLICT` UPSERT** 刷新指标与附属列。
+
+---
+
+**HTTP · `GET`**（只读，`/api/admin/seo-search`）
+
+| Query | 说明 |
+| --- | --- |
+| `path` | **必选**，原始 path 或整 URL |
+| `days` | 默认 `56`，范围 `1..400` · 回看 **UTC 窗口**的起算日与 `growth` 快照 **不对齐也没关系** |
+| `sources` | 可选，逗号 **gsc**，**bing**；缺省 = 两类全选 |
+| `query_limit` | 可选，返回 `granularity='query'` 行数上限，`1..2000`，默认 **120**（防爆表） |
+
+**响应 JSON**：`normalized_path`、`scopes_for_path`（该 path 上出现过的 scopes）、**`page_daily`**（多维聚合后的序列）、**`query_rows`**（按 impressions 降序截断）。
+
+---
+
+**HTTP · `POST`**（写，`/api/admin/seo-search`）
+
+请求体：**`{ rows: Row[] }`**，单次最多 **8000** 条；与 **upsert** 同一形状：
+
+```json
+{
+  "rows": [
+    {
+      "report_date": "2026-05-01",
+      "source": "gsc",
+      "granularity": "page",
+      "site_scope": "sc-domain:ziso.cc",
+      "page_path": "/tools/position-budget",
+      "search_query": "",
+      "impressions": 1200,
+      "clicks": 40,
+      "ctr": 0.03333333333333333,
+      "position": 3.8,
+      "ingest_run_id": "cron-20260512",
+      "raw_json": null
+    },
+    {
+      "report_date": "2026-05-01",
+      "source": "gsc",
+      "granularity": "query",
+      "site_scope": "sc-domain:ziso.cc",
+      "page_path": "/tools/position-budget",
+      "search_query": "position budget china",
+      "impressions": 80,
+      "clicks": 4,
+      "ctr": 0.05,
+      "position": 2.5
+    }
+  ]
+}
+```
+
+**离线 Cron 建议**：GSC **`date`** × **`page`** 先入 **`granularity:'page'`**；若配额允许再拉 **`page` × `query`** 填入 **`granularity:'query'`**。写完任一类行即 **可被 `GET`/Admin 读出**。
+
+---
 
 **闭环动作映射**：
 

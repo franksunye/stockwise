@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BarChart3, Globe2, Languages, RefreshCw, Users } from 'lucide-react';
+import { ArrowLeft, BarChart3, Globe2, Languages, RefreshCw, Search, Users } from 'lucide-react';
 
 type LanguageSegment = {
   language: string;
@@ -94,6 +94,34 @@ type GrowthResponse = {
   snapshots: Snapshot[];
 };
 
+type SeoSearchApiResponse = {
+  generated_at: string;
+  db_strategy: string;
+  normalized_path: string;
+  days: number;
+  sources: string[];
+  scopes_for_path: string[];
+  page_daily: Array<{
+    report_date: string;
+    source: string;
+    site_scope: string;
+    impressions: number;
+    clicks: number;
+    ctr: number | null;
+    position: number | null;
+  }>;
+  query_rows: Array<{
+    report_date: string;
+    source: string;
+    site_scope: string;
+    search_query: string;
+    impressions: number;
+    clicks: number;
+    ctr: number | null;
+    position: number | null;
+  }>;
+};
+
 type TrendPoint = GrowthResponse['trend'][number];
 
 function fmt(value: number | null | undefined): string {
@@ -138,6 +166,174 @@ function BarRow({ label, value, max, aside }: { label: string; value: number; ma
       </div>
       <span className="text-right text-slate-500">{aside || fmt(value)}</span>
     </div>
+  );
+}
+
+function SeoSearchPanel() {
+  const [pathInput, setPathInput] = useState('/tools/position-budget');
+  const [daysInput, setDaysInput] = useState('56');
+  const [loading, setLoading] = useState(false);
+  const [seo, setSeo] = useState<SeoSearchApiResponse | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  const loadSeo = async () => {
+    setLoading(true);
+    setFetchError(null);
+    try {
+      const days = Math.min(Math.max(Number(daysInput) || 56, 1), 400);
+      const q = new URLSearchParams({
+        path: pathInput.trim() || '/',
+        days: String(days),
+        query_limit: '120',
+        sources: 'gsc,bing',
+      });
+      const res = await fetch(`/api/admin/seo-search?${q.toString()}`, { cache: 'no-store' });
+      const json = await res.json() as SeoSearchApiResponse & { error?: string };
+      if (!res.ok) {
+        setSeo(null);
+        setFetchError(typeof json.error === 'string' ? json.error : `HTTP ${res.status}`);
+        return;
+      }
+      setFetchError(null);
+      setSeo(json);
+    } catch (error) {
+      console.error('Failed to load SEO search performance', error);
+      setSeo(null);
+      setFetchError('请求失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pageTail = seo?.page_daily?.length
+    ? [...seo.page_daily].slice(-14)
+    : [];
+  const topQueries = seo?.query_rows?.slice(0, 24) ?? [];
+
+  return (
+    <section className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <Search className="w-4 h-4 text-amber-300" />
+            <h2 className="text-sm font-semibold">搜索表现（GSC / Bing）</h2>
+          </div>
+          <p className="text-xs text-slate-500 max-w-xl">
+            读取表 <span className="font-mono text-slate-400">seo_search_performance</span>
+            ：按 canonical path 的近窗口展示；数据由离线任务 POST 入库（与 GA4 growth 快照分列）。
+          </p>
+        </div>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="flex flex-col gap-1 text-[11px] text-slate-500">
+            path
+            <input
+              value={pathInput}
+              onChange={(e) => setPathInput(e.target.value)}
+              className="h-9 min-w-[220px] rounded border border-white/10 bg-black/30 px-2 font-mono text-xs text-slate-200"
+              spellCheck={false}
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-[11px] text-slate-500">
+            days
+            <input
+              value={daysInput}
+              onChange={(e) => setDaysInput(e.target.value)}
+              className="h-9 w-16 rounded border border-white/10 bg-black/30 px-2 font-mono text-xs text-slate-200"
+              inputMode="numeric"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={loadSeo}
+            disabled={loading}
+            className="h-9 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 text-xs font-semibold text-amber-200 hover:bg-amber-500/20 transition disabled:opacity-50"
+          >
+            {loading ? '加载中…' : '加载'}
+          </button>
+        </div>
+      </div>
+
+      {fetchError ? (
+        <p className="mt-4 text-sm text-rose-300">{fetchError}</p>
+      ) : null}
+
+      {seo ? (
+        <div className="mt-6 space-y-6">
+          <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+            <span>
+              归一：<span className="font-mono text-slate-300">{seo.normalized_path}</span>
+            </span>
+            <span>
+              scopes：
+              {seo.scopes_for_path?.length
+                ? seo.scopes_for_path.map((s) => (
+                  <span key={s} className="ml-1 font-mono text-slate-400">{s}</span>
+                ))
+                : '暂无'}
+            </span>
+            <span>strategy：{seo.db_strategy}</span>
+          </div>
+
+          <div>
+            <h3 className="mb-2 text-xs font-semibold text-slate-400">页面级日序（至多最近 14 条记录）</h3>
+            <div className="overflow-x-auto rounded border border-white/5">
+              <table className="w-full min-w-[640px] text-left text-[11px]">
+                <thead className="bg-white/[0.03] text-slate-500">
+                  <tr>
+                    <th className="px-2 py-2 font-medium">date</th>
+                    <th className="px-2 py-2 font-medium">src</th>
+                    <th className="px-2 py-2 font-medium">scope</th>
+                    <th className="px-2 py-2 font-medium text-right">impr.</th>
+                    <th className="px-2 py-2 font-medium text-right">clk</th>
+                    <th className="px-2 py-2 font-medium text-right">CTR</th>
+                    <th className="px-2 py-2 font-medium text-right">pos</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {pageTail.length ? pageTail.map((row, idx) => (
+                    <tr key={`${row.report_date}-${row.source}-${row.site_scope}-${idx}`} className="text-slate-300">
+                      <td className="px-2 py-1.5 font-mono">{row.report_date.slice(5)}</td>
+                      <td className="px-2 py-1.5">{row.source}</td>
+                      <td className="px-2 py-1.5 font-mono text-slate-500 truncate max-w-[120px]" title={row.site_scope}>{row.site_scope}</td>
+                      <td className="px-2 py-1.5 text-right">{fmt(row.impressions)}</td>
+                      <td className="px-2 py-1.5 text-right">{fmt(row.clicks)}</td>
+                      <td className="px-2 py-1.5 text-right">{row.ctr === null ? '—' : pct(row.ctr * 100)}</td>
+                      <td className="px-2 py-1.5 text-right">{row.position === null ? '—' : row.position.toFixed(1)}</td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan={7} className="px-2 py-4 text-center text-slate-500">
+                        暂无页面级序列。确认离线任务已向该 path 写入 <span className="font-mono">granularity=&apos;page&apos;</span> 行。
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-2 text-xs font-semibold text-slate-400">Top queries（按 impressions）</h3>
+            <div className="divide-y divide-white/5">
+              {topQueries.length ? topQueries.map((row) => (
+                <div key={`${row.report_date}-${row.source}-${row.search_query}`} className="flex flex-wrap items-baseline justify-between gap-2 py-2 text-xs">
+                  <span className="font-mono text-slate-200 break-all">{row.search_query}</span>
+                  <span className="shrink-0 text-slate-500">
+                    {fmt(row.impressions)} impr · pos {row.position === null ? '—' : row.position.toFixed(1)}
+                  </span>
+                </div>
+              )) : (
+                <p className="text-sm text-slate-500 py-2">暂无查询明细。需在入库时写入 <span className="font-mono">granularity=&apos;query&apos;</span> 行。</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {!seo && !fetchError && !loading ? (
+        <p className="mt-4 text-sm text-slate-500">点击「加载」从数据库拉取该路径的搜索表现。</p>
+      ) : null}
+    </section>
   );
 }
 
@@ -492,6 +688,8 @@ export default function GrowthPage() {
             </section>
           </>
         )}
+
+        <SeoSearchPanel />
       </div>
     </div>
   );
