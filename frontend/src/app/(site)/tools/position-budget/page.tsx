@@ -1199,8 +1199,7 @@ export default function PositionBudgetToolPage() {
                             {t('recentEmpty')}
                         </p>
                     ) : (
-                        <div className="-mx-4 overflow-x-auto scroll-px-4 px-4 pb-2 snap-x snap-mandatory [-webkit-overflow-scrolling:touch] sm:snap-none sm:mx-0 sm:scroll-px-0 sm:px-0">
-                            <div className="flex gap-3 sm:grid sm:grid-cols-3">
+                        <div className="-mx-4 flex flex-nowrap gap-3 overflow-x-auto scroll-px-4 px-4 pb-2 snap-x snap-mandatory [-webkit-overflow-scrolling:touch] sm:mx-0 sm:w-full sm:flex-wrap sm:justify-center sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-2 sm:snap-none sm:scroll-px-0">
                             {snapshots.map((snapshot) => {
                                 const rMultiple = snapshotRMultiple(snapshot);
                                 const rMultipleText = rMultiple === null ? '—' : `${fmt(rMultiple, 2, locale)}R`;
@@ -1246,7 +1245,7 @@ export default function PositionBudgetToolPage() {
                                         key={snapshot.snapshot_id}
                                         role="article"
                                         aria-label={snapshotAriaPieces.join('. ')}
-                                        className={`relative min-w-[260px] shrink-0 snap-start rounded-2xl p-4 transition-colors ${cardToneClass}`}
+                                        className={`relative min-w-[260px] shrink-0 snap-start rounded-2xl p-4 transition-colors sm:flex-none sm:min-w-0 sm:w-[min(360px,max(260px,calc((100%-1.5rem)/3)))] sm:snap-none ${cardToneClass}`}
                                     >
                                         <div className="flex items-start justify-between gap-3">
                                             <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -1340,7 +1339,6 @@ export default function PositionBudgetToolPage() {
                                     </div>
                                 );
                             })}
-                            </div>
                         </div>
                     )}
                 </section>
