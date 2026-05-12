@@ -161,30 +161,26 @@ function snapshotRiskSemantic(snapshot: PositionBudgetSnapshot): 'valid' | 'warn
 }
 
 const SNAPSHOT_SETUP_TYPE_LABEL_CLASS: Record<PositionBudgetSetupType, string> = {
-    breakout: 'text-sky-400',
-    pullback: 'text-purple-400',
-    trend_continuation: 'text-teal-400',
-    reversal: 'text-amber-400',
-    earnings: 'text-pink-400',
-    swing: 'text-indigo-400',
-    scalping: 'text-cyan-400',
+    breakout: 'text-sky-300/95',
+    pullback: 'text-purple-300/95',
+    trend_continuation: 'text-teal-300/95',
+    reversal: 'text-amber-300/95',
+    earnings: 'text-pink-300/95',
+    swing: 'text-indigo-300/95',
+    scalping: 'text-cyan-300/95',
     other: 'text-slate-400',
 };
 
 function snapshotRiskDotClass(semantic: 'valid' | 'warning' | 'invalid'): string {
-    if (semantic === 'valid') {
-        return 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.45)]';
-    }
-    if (semantic === 'warning') {
-        return 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.42)]';
-    }
-    return 'bg-rose-400 shadow-[0_0_10px_rgba(251,113,133,0.42)]';
+    if (semantic === 'valid') return 'bg-emerald-400/85';
+    if (semantic === 'warning') return 'bg-amber-400/85';
+    return 'bg-rose-400/85';
 }
 
 function snapshotRiskValueClass(semantic: 'valid' | 'warning' | 'invalid'): string {
-    if (semantic === 'valid') return 'text-emerald-200';
-    if (semantic === 'warning') return 'text-amber-200';
-    return 'text-rose-200';
+    if (semantic === 'valid') return 'text-emerald-300';
+    if (semantic === 'warning') return 'text-amber-300';
+    return 'text-rose-300';
 }
 
 const BUDGET_ERROR_KEYS: Record<string, MessageKey<'positionBudget'>> = {
@@ -1243,23 +1239,23 @@ export default function PositionBudgetToolPage() {
                                     `${t('snapshotCreated')} ${fmtRelativeTime(snapshot.created_at, locale)}`,
                                 ];
                                 const cardToneClass = isLoaded
-                                    ? 'border-2 border-indigo-400/70 bg-white/[0.045] shadow-[0_0_28px_-8px_rgba(129,140,248,0.38)] ring-2 ring-indigo-500/25 ring-offset-2 ring-offset-[#050508]'
-                                    : 'border border-white/10 bg-white/[0.035] hover:bg-white/[0.065] hover:border-white/15';
+                                    ? 'border border-indigo-500/35 bg-white/[0.035]'
+                                    : 'border border-white/[0.08] bg-white/[0.025] hover:border-white/12 hover:bg-white/[0.04]';
                                 return (
                                     <div
                                         key={snapshot.snapshot_id}
                                         role="article"
                                         aria-label={snapshotAriaPieces.join('. ')}
-                                        className={`relative min-w-[260px] shrink-0 snap-start rounded-[24px] p-4 transition-colors ${cardToneClass}`}
+                                        className={`relative min-w-[260px] shrink-0 snap-start rounded-2xl p-4 transition-colors ${cardToneClass}`}
                                     >
                                         <div className="flex items-start justify-between gap-3">
                                             <div className="flex min-w-0 flex-1 items-center gap-2">
                                                 <span
-                                                    className={`h-2 w-2 shrink-0 rounded-full ${dotClass}`}
+                                                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}`}
                                                     aria-hidden
                                                 />
                                                 <p
-                                                    className={`truncate text-[10px] font-black uppercase tracking-[0.2em] ${setupLabelClass}`}
+                                                    className={`truncate text-[10px] font-bold uppercase tracking-widest ${setupLabelClass}`}
                                                 >
                                                     {setupHeading}
                                                 </p>
@@ -1268,17 +1264,17 @@ export default function PositionBudgetToolPage() {
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
                                                     {t('snapshotStopType')}
                                                 </span>
-                                                <span className="rounded-md border border-white/10 bg-white/[0.08] px-2 py-0.5 text-[10px] font-bold tabular-nums text-slate-100">
+                                                <span className="rounded-md border border-white/[0.08] bg-white/[0.055] px-2 py-0.5 text-[10px] font-bold tabular-nums text-slate-200">
                                                     {stopModeLabel}
                                                 </span>
                                             </div>
                                         </div>
 
-                                        <p className="mt-3 truncate font-mono text-xl font-black italic tracking-tighter text-white sm:text-2xl">
+                                        <p className="mt-2 truncate font-mono text-lg font-black italic tracking-tighter text-white sm:text-xl">
                                             {snapshot.symbol}
                                         </p>
 
-                                        <div className="mt-4 grid grid-cols-3 gap-x-2 gap-y-2 border-t border-white/5 pt-4 text-left">
+                                        <div className="mt-3 grid grid-cols-3 gap-x-2 gap-y-2 border-t border-white/[0.06] pt-3 text-left">
                                             <div className="min-w-0">
                                                 <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
                                                     {t('snapshotEntryShort')}
@@ -1305,21 +1301,21 @@ export default function PositionBudgetToolPage() {
                                             </div>
                                         </div>
 
-                                        <div className="mt-5 flex items-end justify-between gap-4">
-                                            <p className="mono text-[2.0625rem] font-black tracking-tighter text-indigo-200 leading-none sm:text-[2.375rem]">
+                                        <div className="mt-4 flex items-end justify-between gap-4">
+                                            <p className="mono text-3xl font-black tracking-tighter text-indigo-300/95 leading-none sm:text-[2rem]">
                                                 {rMultipleText}
                                             </p>
-                                            <div className="pb-1 text-right">
-                                                <p className="mono text-base font-black text-white tabular-nums sm:text-lg">
+                                            <div className="pb-0.5 text-right">
+                                                <p className="mono text-sm font-black text-white tabular-nums sm:text-base">
                                                     {fmt(snapshot.position_size, 0, locale)}
                                                 </p>
-                                                <p className="mt-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                                                <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-slate-500">
                                                     {t('sharesUnitCompact')}
                                                 </p>
                                             </div>
                                         </div>
 
-                                        <div className="mt-5 border-t border-white/5 pt-4 space-y-2">
+                                        <div className="mt-4 border-t border-white/[0.06] pt-3 space-y-1.5">
                                             <div className="flex items-center justify-between gap-3 text-[11px] font-bold">
                                                 <span className="text-slate-500">{t('snapshotRisk')}</span>
                                                 <span className={`mono tabular-nums ${riskValueClass}`}>
@@ -1337,7 +1333,7 @@ export default function PositionBudgetToolPage() {
                                         <button
                                             type="button"
                                             onClick={() => loadSnapshotAsCurrent(snapshot)}
-                                            className="mt-5 w-full rounded-xl bg-indigo-600 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-white shadow-[0_10px_28px_-8px_rgba(99,102,241,0.55)] transition-all hover:bg-indigo-500 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0b10]"
+                                            className="mt-4 w-full rounded-xl border border-white/10 bg-indigo-600/90 py-2.5 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
                                         >
                                             {t('snapshotLoadCta')}
                                         </button>
