@@ -3,6 +3,16 @@
 import type { PositionBudgetRMode } from '@/lib/position-budget';
 import type { StockSearchHit } from '@/hooks/useStockSymbolSearch';
 
+export type PositionBudgetSetupType =
+  | 'breakout'
+  | 'pullback'
+  | 'trend_continuation'
+  | 'reversal'
+  | 'earnings'
+  | 'swing'
+  | 'scalping'
+  | 'other';
+
 export type PositionBudgetPreferences = {
   default_account_size: number | null;
   default_risk_ratio: number;
@@ -11,6 +21,7 @@ export type PositionBudgetPreferences = {
 
 export type PositionBudgetSnapshotInput = {
   symbol: string;
+  setup_type: PositionBudgetSetupType | null;
   entry_price: number;
   stop_loss_price: number;
   target_price: number | null;
@@ -26,6 +37,7 @@ export type PositionBudgetSnapshotInput = {
 export type PositionBudgetSnapshot = {
   snapshot_id: string;
   symbol: string;
+  setup_type: PositionBudgetSetupType | null;
   entry_price: number;
   stop_loss_price: number;
   target_price: number | null;

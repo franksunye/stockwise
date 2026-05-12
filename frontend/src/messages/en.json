@@ -739,12 +739,15 @@
     "fieldTargetHint": "Used for R-multiple; leave blank to skip",
     "advancedHeading": "Advanced",
     "advancedHint": "Target price and pro parameters stay out of the main flow",
+    "advancedSummaryTarget": "Target set",
     "expand": "Expand",
     "collapse": "Collapse",
     "stopModeHeading": "Stop style",
     "fieldStopPct": "Stop distance (%)",
     "fieldSystemStop": "Strategy stop price",
     "fieldFixedStop": "Stop price",
+    "fieldSetupType": "Setup Type (optional)",
+    "setupTypePlaceholder": "Select setup type",
     "statusOk": "OK",
     "statusIncomplete": "INCOMPLETE",
     "loadingPreferences": "Loading preferences...",
@@ -770,6 +773,9 @@
     "recentEmpty": "No budget snapshots yet. Save once to see recent records here.",
     "loadSnapshot": "Load as current parameters",
     "snapshotLoaded": "Loaded historical budget parameters; saving will create a new snapshot",
+    "snapshotPlanType": "Budget Plan",
+    "snapshotRisk": "Risk",
+    "snapshotCreated": "Created",
     "noticeHeading": "Note",
     "fieldAlerts": "Field alerts",
     "stickyResult": "Result Summary",
@@ -804,6 +810,26 @@
         "shortLabel": "Percent",
         "hint": "Relative distance from entry"
       }
+    },
+    "setupTypes": {
+      "breakout": "Breakout",
+      "pullback": "Pullback",
+      "trend_continuation": "Trend Continuation",
+      "reversal": "Reversal",
+      "earnings": "Earnings",
+      "swing": "Swing",
+      "scalping": "Scalping",
+      "other": "Other"
+    },
+    "setupTypesShort": {
+      "breakout": "Breakout",
+      "pullback": "Pullback",
+      "trend_continuation": "Continuation",
+      "reversal": "Reversal",
+      "earnings": "Earnings",
+      "swing": "Swing",
+      "scalping": "Scalp",
+      "other": "Other"
     },
     "budgetErrors": {
       "invalidAccountSize": "Invalid account size",

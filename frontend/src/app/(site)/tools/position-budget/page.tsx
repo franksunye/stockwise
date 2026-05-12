@@ -7,6 +7,7 @@ import {
     ArrowLeft,
     Calculator,
     CheckCircle2,
+    ChevronDown,
     Loader2,
     RefreshCcw,
     Wand2,
@@ -36,6 +37,7 @@ import {
     savePositionBudgetPreferences,
     savePositionBudgetSnapshot,
     type PositionBudgetPricePoint,
+    type PositionBudgetSetupType,
     type PositionBudgetSnapshot,
 } from '@/lib/position-budget-client';
 
@@ -51,6 +53,17 @@ type Banner =
     | { tone: 'info'; text: string }
     | { tone: 'success'; text: string }
     | { tone: 'error'; text: string };
+
+const SETUP_TYPE_OPTIONS: PositionBudgetSetupType[] = [
+    'breakout',
+    'pullback',
+    'trend_continuation',
+    'reversal',
+    'earnings',
+    'swing',
+    'scalping',
+    'other',
+];
 
 function toNumber(value: unknown): number | null {
     const num = Number(value);
@@ -195,6 +208,7 @@ export default function PositionBudgetToolPage() {
     const [accountSize, setAccountSize] = useState('');
     const [riskRatioPercent, setRiskRatioPercent] = useState('1');
     const [stopPercent, setStopPercent] = useState('5');
+    const [setupType, setSetupType] = useState<PositionBudgetSetupType | ''>('');
     const [rMode, setRMode] = useState<PositionBudgetRMode>('system_followed');
     const [advancedOpen, setAdvancedOpen] = useState(false);
     const prefillAbortRef = useRef<AbortController | null>(null);
@@ -459,6 +473,7 @@ export default function PositionBudgetToolPage() {
             setSystemStopLossPrice(String(snapshot.stop_loss_price));
             setFixedStopLossPrice(String(snapshot.stop_loss_price));
             setRMode(snapshot.r_mode);
+            setSetupType(snapshot.setup_type ?? '');
             if (snapshot.r_mode === 'percent_stop' && snapshot.entry_price > 0) {
                 const derivedStopPercent =
                     ((snapshot.entry_price - snapshot.stop_loss_price) / snapshot.entry_price) * 100;
@@ -496,6 +511,7 @@ export default function PositionBudgetToolPage() {
 
             const snapshotResp = await savePositionBudgetSnapshot({
                 symbol: selected.symbol,
+                setup_type: setupType || null,
                 entry_price: Number(entryPrice),
                 stop_loss_price: budget.resolvedStopLossPrice,
                 target_price: targetPrice === '' ? null : Number(targetPrice),
@@ -527,6 +543,47 @@ export default function PositionBudgetToolPage() {
     const canSave = bootstrapped && !!selected && budget.ok && !saving;
     const verdict = useMemo(() => buildPositionBudgetVerdict(budget), [budget]);
     const stickyRMultiple = budget.rMultiple === null ? '—' : `${fmt(budget.rMultiple, 2, locale)}R`;
+    const snapshotModeLabels = useMemo(
+        () => ({
+            system_followed: t('rMode.system_followed.shortLabel' as MessageKey<'positionBudget'>),
+            fixed_stop: t('rMode.fixed_stop.shortLabel' as MessageKey<'positionBudget'>),
+            percent_stop: t('rMode.percent_stop.shortLabel' as MessageKey<'positionBudget'>),
+        }),
+        [t],
+    );
+    const setupTypeLabels = useMemo(
+        () =>
+            SETUP_TYPE_OPTIONS.reduce(
+                (acc, value) => {
+                    acc[value] = t(`setupTypes.${value}` as MessageKey<'positionBudget'>);
+                    return acc;
+                },
+                {} as Record<PositionBudgetSetupType, string>,
+            ),
+        [t],
+    );
+    const setupTypeLabelsShort = useMemo(
+        () =>
+            SETUP_TYPE_OPTIONS.reduce(
+                (acc, value) => {
+                    acc[value] = t(`setupTypesShort.${value}` as MessageKey<'positionBudget'>);
+                    return acc;
+                },
+                {} as Record<PositionBudgetSetupType, string>,
+            ),
+        [t],
+    );
+    const advancedCollapsedSummary = useMemo(() => {
+        const parts: string[] = [];
+        if (setupType) {
+            parts.push(setupTypeLabelsShort[setupType]);
+        }
+        const targetNum = Number(targetPrice);
+        if (targetPrice.trim() !== '' && Number.isFinite(targetNum) && targetNum > 0) {
+            parts.push(t('advancedSummaryTarget'));
+        }
+        return parts.join(' · ');
+    }, [setupType, setupTypeLabelsShort, targetPrice, t]);
 
     return (
         <div className="min-h-[100dvh] bg-[#050508] text-white font-sans">
@@ -614,7 +671,7 @@ export default function PositionBudgetToolPage() {
                 </div>
             </header>
 
-            <main className="relative mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8 space-y-6 pb-36">
+            <main className="relative mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8 space-y-6 pb-52 sm:pb-56">
                 {/* Banner */}
                 {banner ? (
                     <div
@@ -881,22 +938,59 @@ export default function PositionBudgetToolPage() {
                             <button
                                 type="button"
                                 onClick={() => setAdvancedOpen((next) => !next)}
-                                className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left"
+                                className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508] rounded-2xl"
                             >
-                                <span>
+                                <span className="min-w-0 flex-1">
                                     <span className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
                                         {t('advancedHeading')}
                                     </span>
                                     <span className="mt-0.5 hidden sm:block text-[10px] text-slate-600">
                                         {t('advancedHint')}
                                     </span>
+                                    {!advancedOpen && advancedCollapsedSummary ? (
+                                        <span className="mt-1 block truncate text-[10px] font-bold text-slate-400 sm:hidden">
+                                            {advancedCollapsedSummary}
+                                        </span>
+                                    ) : null}
                                 </span>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">
-                                    {advancedOpen ? t('collapse') : t('expand')}
+                                <span className="flex shrink-0 items-center gap-2">
+                                    {!advancedOpen && advancedCollapsedSummary ? (
+                                        <span className="hidden sm:inline truncate max-w-[200px] text-[10px] font-bold uppercase tracking-wide text-indigo-300/90">
+                                            {advancedCollapsedSummary}
+                                        </span>
+                                    ) : null}
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">
+                                        {advancedOpen ? t('collapse') : t('expand')}
+                                    </span>
                                 </span>
                             </button>
                             {advancedOpen ? (
-                                <div className="border-t border-white/5 p-3">
+                                <div className="space-y-3 border-t border-white/5 p-3">
+                                    <label className="block">
+                                        <p className="mb-1 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.14em] text-slate-500 truncate">
+                                            {t('fieldSetupType')}
+                                        </p>
+                                        <div className="relative">
+                                            <select
+                                                value={setupType}
+                                                onChange={(event) =>
+                                                    setSetupType(event.target.value as PositionBudgetSetupType | '')
+                                                }
+                                                className="w-full appearance-none bg-black/40 border border-white/5 rounded-xl py-2.5 pl-3 pr-10 text-sm font-bold text-white focus:outline-none focus:border-indigo-500/50 focus:bg-black/60 focus-visible:ring-2 focus-visible:ring-indigo-500/40 transition-colors cursor-pointer"
+                                            >
+                                                <option value="">{t('setupTypePlaceholder')}</option>
+                                                {SETUP_TYPE_OPTIONS.map((value) => (
+                                                    <option key={value} value={value}>
+                                                        {setupTypeLabels[value]}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown
+                                                aria-hidden
+                                                className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+                                            />
+                                        </div>
+                                    </label>
                                     <FieldNumber
                                         label={t('fieldTarget')}
                                         value={targetPrice}
@@ -1058,30 +1152,84 @@ export default function PositionBudgetToolPage() {
                             {t('recentEmpty')}
                         </p>
                     ) : (
-                        <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
-                            <div className="flex gap-3 sm:grid sm:grid-cols-3 lg:grid-cols-4">
+                        <div className="-mx-4 overflow-x-auto scroll-px-4 px-4 pb-2 snap-x snap-mandatory [-webkit-overflow-scrolling:touch] sm:snap-none sm:mx-0 sm:scroll-px-0 sm:px-0">
+                            <div className="flex gap-3 sm:grid sm:grid-cols-3">
                             {snapshots.map((snapshot) => {
                                 const tone = snapshotStatusTone(snapshot);
+                                const rMultiple = snapshotRMultiple(snapshot);
+                                const rMultipleText = rMultiple === null ? '—' : `${fmt(rMultiple, 2, locale)}R`;
+                                const modeLabel = snapshotModeLabels[snapshot.r_mode] ?? snapshot.r_mode;
+                                const setupHeading = snapshot.setup_type
+                                    ? setupTypeLabelsShort[snapshot.setup_type] ?? snapshot.setup_type
+                                    : t('snapshotPlanType');
+                                const snapshotAriaPieces = [
+                                    t('loadSnapshot'),
+                                    snapshot.symbol,
+                                    ...(snapshot.setup_type
+                                        ? [setupTypeLabelsShort[snapshot.setup_type] ?? snapshot.setup_type]
+                                        : []),
+                                    `${fmt(snapshot.position_size, 0, locale)} ${t('sharesUnitCompact')}`,
+                                    `${t('snapshotRisk')} ${fmt(snapshot.expected_loss, 2, locale)}`,
+                                    `${t('snapshotCreated')} ${fmtRelativeTime(snapshot.created_at, locale)}`,
+                                ];
                                 return (
                                     <button
                                         key={snapshot.snapshot_id}
                                         type="button"
                                         onClick={() => loadSnapshotAsCurrent(snapshot)}
-                                        className="min-w-[185px] sm:min-w-0 text-left rounded-2xl border border-white/10 bg-white/[0.035] hover:bg-white/[0.07] active:scale-[0.99] transition-all p-3.5"
+                                        className="min-w-[230px] sm:min-w-0 shrink-0 snap-start text-left rounded-[24px] border border-white/10 bg-white/[0.035] hover:bg-white/[0.07] active:scale-[0.99] transition-all p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
                                         title={t('loadSnapshot')}
+                                        aria-label={snapshotAriaPieces.join('. ')}
                                     >
                                         <div className="flex items-start justify-between gap-3">
                                             <div className="min-w-0">
-                                                <p className="truncate text-sm font-black italic tracking-tighter text-white">
+                                                <p className="truncate text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                                                    {setupHeading}
+                                                </p>
+                                                <p className="mt-1 truncate text-lg font-black italic tracking-tighter text-white">
                                                     {snapshot.symbol}
                                                 </p>
-                                                <p className="mt-1 truncate text-[11px] text-slate-400">
-                                                    {fmt(snapshot.position_size, 0, locale)} {t('sharesUnitCompact')}{' '}
-                                                    <span className="text-slate-600">·</span>{' '}
-                                                    {fmtRelativeTime(snapshot.created_at, locale)}
+                                            </div>
+                                            <div className="flex shrink-0 items-center gap-2">
+                                                <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-emerald-300">
+                                                    {t('directionLong')}
+                                                </span>
+                                                <span className={`h-2 w-2 rounded-full ${snapshotDotClass(tone)}`} />
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-4 flex items-end justify-between gap-4">
+                                            <div>
+                                                <p className="mono text-3xl font-black tracking-tighter text-indigo-200">
+                                                    {rMultipleText}
+                                                </p>
+                                                <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                                    {modeLabel}
                                                 </p>
                                             </div>
-                                            <span className={`mt-5 h-2 w-2 shrink-0 rounded-full ${snapshotDotClass(tone)}`} />
+                                            <div className="text-right">
+                                                <p className="mono text-sm font-black text-white">
+                                                    {fmt(snapshot.position_size, 0, locale)}
+                                                </p>
+                                                <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                                    {t('sharesUnitCompact')}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-4 border-t border-white/5 pt-3">
+                                            <div className="flex items-center justify-between gap-3 text-[11px] font-bold">
+                                                <span className="text-slate-500">{t('snapshotRisk')}</span>
+                                                <span className="mono text-rose-200">
+                                                    {fmt(snapshot.expected_loss, 2, locale)}
+                                                </span>
+                                            </div>
+                                            <div className="mt-2 flex items-center justify-between gap-3 text-[11px] font-bold">
+                                                <span className="text-slate-500">{t('snapshotCreated')}</span>
+                                                <span className="text-slate-300">
+                                                    {fmtRelativeTime(snapshot.created_at, locale)}
+                                                </span>
+                                            </div>
                                         </div>
                                     </button>
                                 );
@@ -1107,7 +1255,7 @@ export default function PositionBudgetToolPage() {
                     <button
                         onClick={() => void saveAll()}
                         disabled={!canSave}
-                        className="shrink-0 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] sm:text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_10px_25px_rgba(99,102,241,0.25)]"
+                        className="shrink-0 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] sm:text-xs font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_10px_25px_rgba(99,102,241,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
                     >
                         {saving ? (
                             <Loader2 className="w-4 h-4 animate-spin" />

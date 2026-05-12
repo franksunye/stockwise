@@ -739,12 +739,15 @@
     "fieldTargetHint": "用于推导 R 倍数；未填则不计算",
     "advancedHeading": "高级设置",
     "advancedHint": "目标价等专业参数默认收起",
+    "advancedSummaryTarget": "已设目标价",
     "expand": "展开",
     "collapse": "收起",
     "stopModeHeading": "止损方式",
     "fieldStopPct": "止损幅度（%）",
     "fieldSystemStop": "策略止损价",
     "fieldFixedStop": "止损价格",
+    "fieldSetupType": "Setup Type（可选）",
+    "setupTypePlaceholder": "选择交易形态",
     "statusOk": "OK",
     "statusIncomplete": "待补完",
     "loadingPreferences": "正在加载用户偏好...",
@@ -770,6 +773,9 @@
     "recentEmpty": "暂无预算快照。完成一次保存后，这里会显示最近记录。",
     "loadSnapshot": "载入为当前参数",
     "snapshotLoaded": "已载入历史预算参数；保存时会生成新的快照",
+    "snapshotPlanType": "预算计划",
+    "snapshotRisk": "风险",
+    "snapshotCreated": "创建",
     "noticeHeading": "注意",
     "fieldAlerts": "字段提示",
     "stickyResult": "结果摘要",
@@ -804,6 +810,26 @@
         "shortLabel": "百分比",
         "hint": "按入场价回撤比例计算"
       }
+    },
+    "setupTypes": {
+      "breakout": "Breakout 突破",
+      "pullback": "Pullback 回踩",
+      "trend_continuation": "Trend Continuation 趋势延续",
+      "reversal": "Reversal 反转",
+      "earnings": "Earnings 财报",
+      "swing": "Swing 波段",
+      "scalping": "Scalping 短打",
+      "other": "Other 其他"
+    },
+    "setupTypesShort": {
+      "breakout": "突破",
+      "pullback": "回踩",
+      "trend_continuation": "趋势延续",
+      "reversal": "反转",
+      "earnings": "财报",
+      "swing": "波段",
+      "scalping": "短打",
+      "other": "其他"
     },
     "budgetErrors": {
       "invalidAccountSize": "账户规模无效",

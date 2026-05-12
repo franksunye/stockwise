@@ -13,6 +13,7 @@ export interface PositionBudgetSnapshotRow {
   snapshot_id: string;
   user_id: string;
   symbol: string;
+  setup_type: string | null;
   entry_price: number;
   stop_loss_price: number;
   target_price: number | null;
@@ -59,6 +60,7 @@ export async function ensurePositionBudgetSchema(
       snapshot_id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
       symbol TEXT NOT NULL,
+      setup_type TEXT,
       entry_price REAL NOT NULL,
       stop_loss_price REAL NOT NULL,
       target_price REAL,
@@ -77,6 +79,12 @@ export async function ensurePositionBudgetSchema(
     CREATE INDEX IF NOT EXISTS idx_pbs_user_created
     ON position_budget_snapshots(user_id, created_at DESC)
   `);
+
+  try {
+    await execute(client, strategy, 'ALTER TABLE position_budget_snapshots ADD COLUMN setup_type TEXT');
+  } catch (error) {
+    if (!isDuplicateColumnError(error)) throw error;
+  }
 
   for (const sql of [
     'ALTER TABLE users ADD COLUMN default_account_size REAL',
@@ -159,6 +167,7 @@ export async function createPositionBudgetSnapshot(
       snapshot_id,
       user_id,
       symbol,
+      setup_type,
       entry_price,
       stop_loss_price,
       target_price,
@@ -170,13 +179,14 @@ export async function createPositionBudgetSnapshot(
       expected_loss,
       r_mode,
       created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const args = [
     input.snapshot_id,
     input.user_id,
     input.symbol,
+    input.setup_type,
     input.entry_price,
     input.stop_loss_price,
     input.target_price,
@@ -202,7 +212,7 @@ export async function listPositionBudgetSnapshots(
   const hasSymbol = !!symbol;
   const sql = hasSymbol
     ? `
-      SELECT snapshot_id, user_id, symbol, entry_price, stop_loss_price, target_price, account_size, risk_ratio,
+      SELECT snapshot_id, user_id, symbol, setup_type, entry_price, stop_loss_price, target_price, account_size, risk_ratio,
              risk_amount, risk_per_share, position_size, expected_loss, r_mode, created_at
       FROM position_budget_snapshots
       WHERE user_id = ? AND symbol = ?
@@ -210,7 +220,7 @@ export async function listPositionBudgetSnapshots(
       LIMIT ?
     `
     : `
-      SELECT snapshot_id, user_id, symbol, entry_price, stop_loss_price, target_price, account_size, risk_ratio,
+      SELECT snapshot_id, user_id, symbol, setup_type, entry_price, stop_loss_price, target_price, account_size, risk_ratio,
              risk_amount, risk_per_share, position_size, expected_loss, r_mode, created_at
       FROM position_budget_snapshots
       WHERE user_id = ?

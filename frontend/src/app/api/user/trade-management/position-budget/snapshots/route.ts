@@ -25,6 +25,22 @@ function isValidRMode(input: unknown): input is PositionBudgetRMode {
   return value === 'system_followed' || value === 'fixed_stop' || value === 'percent_stop';
 }
 
+function normalizeSetupType(input: unknown): string | null {
+  const value = String(input || '').trim().toLowerCase();
+  if (!value) return null;
+  const allowed = new Set([
+    'breakout',
+    'pullback',
+    'trend_continuation',
+    'reversal',
+    'earnings',
+    'swing',
+    'scalping',
+    'other',
+  ]);
+  return allowed.has(value) ? value : null;
+}
+
 function isCloseEnough(a: number, b: number, epsilon: number = 0.01): boolean {
   return Math.abs(a - b) <= epsilon;
 }
@@ -62,6 +78,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const symbol = String(body.symbol || '').trim().toUpperCase();
   const rMode = body.r_mode;
+  const setupType = normalizeSetupType(body.setup_type);
 
   if (!symbol || !isValidPositionBudgetSymbol(symbol)) {
     return NextResponse.json({ error: 'Invalid symbol' }, { status: 400 });
@@ -113,6 +130,7 @@ export async function POST(request: Request) {
       snapshot_id: snapshotId,
       user_id: userId,
       symbol,
+      setup_type: setupType,
       entry_price: Number(computeInput.entryPrice),
       stop_loss_price: computed.resolvedStopLossPrice,
       target_price: computeInput.targetPrice ?? null,
