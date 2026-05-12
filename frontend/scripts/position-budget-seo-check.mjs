@@ -57,6 +57,19 @@ function run() {
       console.log('  ✔ sitemap contains /tools/position-budget');
     }
 
+    const sitemapGscUrl = `${BASE}/sitemap-gsc.xml`;
+    const smG = await fetch(sitemapGscUrl, { redirect: 'follow' });
+    const smGText = smG.ok ? await smG.text() : '';
+    const gscEcho = smG.ok && smGText.includes('/tools/position-budget');
+
+    console.log(smG.ok ? `  ✔ sitemap-gsc fetch ${sitemapGscUrl}` : `  ✖ sitemap-gsc fetch failed (${smG.status})`);
+    if (!smG.ok || !gscEcho) {
+      console.log('  ✖ sitemap-gsc contains /tools/position-budget');
+      failed = true;
+    } else {
+      console.log('  ✔ sitemap-gsc contains /tools/position-budget');
+    }
+
     if (failed) {
       console.error('\n[position-budget-seo-check] FAILED\n');
       process.exit(1);

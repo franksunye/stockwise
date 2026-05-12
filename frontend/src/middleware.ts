@@ -204,6 +204,8 @@ export function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|txt|xml|json|html|woff|woff2|ttf)$).*)',
+        // Exclude static/binary assets AND sitemap/robots. Explicit names so future routes like `/sitemap-gsc.xml`
+        // stay off the locale middleware (`sitemap-gsc.xml` is also matched by generic `\\.xml`).
+        '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|robots.txt|sitemap\\.xml|sitemap-gsc\\.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|txt|xml|json|html|woff|woff2|ttf)$).*)',
     ],
 };
