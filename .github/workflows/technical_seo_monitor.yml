@@ -1,0 +1,46 @@
+name: Technical SEO Monitor (Position Budget)
+
+# Fully automated Technical SEO checks (Spec 57 §14.5 / position-budget-seo-check.mjs).
+# Hits production HTML + sitemap; fails the job when assertions break.
+
+on:
+  schedule:
+    # ~09:00 Asia/Shanghai — daily regression guard on live HTML / sitemap
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/scripts/position-budget-seo-check.mjs'
+      - 'frontend/src/app/(site)/tools/position-budget/**'
+      - '.github/workflows/technical_seo_monitor.yml'
+  pull_request:
+    paths:
+      - 'frontend/scripts/position-budget-seo-check.mjs'
+      - 'frontend/src/app/(site)/tools/position-budget/**'
+      - '.github/workflows/technical_seo_monitor.yml'
+
+concurrency:
+  group: tech-seo-position-budget-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  seo-check-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # Override per-repo in this workflow if needed (e.g. staging URL)
+      SEO_CHECK_BASE_URL: https://ziso.cc
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run Position Budget SEO check (against SEO_CHECK_BASE_URL)
+        working-directory: frontend
+        run: node scripts/position-budget-seo-check.mjs

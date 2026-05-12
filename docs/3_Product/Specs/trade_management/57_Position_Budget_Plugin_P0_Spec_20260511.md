@@ -692,7 +692,7 @@ P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染
 | 日期 | 周期 | Plan 摘要 | Do（PR/版本） | Check 结论 | Act |
 | --- | --- | --- | --- | --- | --- |
 | YYYY-MM-DD | 例：2026 Q2 |  |  |  |  |
-| 2026-05-12 | Cycle 0 · 基线 | 固化技术侧 Check：可重复的 HTML + sitemap 巡检；GSC/Bing/GEO 留作人工补栏 | Spec 与脚本落地；参见 `frontend/package.json` · `check:position-budget-seo` | 线上 spot-check：**HTTP 200**；`<title>` 含 Position Budget；`description` meta 存在；`application/ld+json` · `SoftwareApplication` 存在；`sitemap.xml` 含 `https://ziso.cc/tools/position-budget` | **基线**：后续周期对比；**待补**：GSC 索引与 query、Bing、GEO 抽样表（负责人填入本行或外链） |
+| 2026-05-12 | Cycle 0 · 基线 | 固化技术侧 Check：可重复的 HTML + sitemap 巡检；GSC/Bing/GEO 留作人工补栏 | Spec 与脚本落地；参见 `frontend/package.json` · `check:position-budget-seo`；**另有** `.github/workflows/technical_seo_monitor.yml`（对生产域名 **全自动** cron + 触控路径触发） | 线上 spot-check：**HTTP 200**；`<title>` 含 Position Budget；`description` meta 存在；`application/ld+json` · `SoftwareApplication` 存在；`sitemap.xml` 含 `https://ziso.cc/tools/position-budget` | **基线**：后续周期对比；**待补**：GSC 索引与 query（已接库见 §14.6）、Bing、GEO 抽样表 |
 
 **负责人边界**：可由工程侧稳定执行 **脚本 + Spec 归档**（Do/Check 中技术块）；涉及 **GSC 权限、竞品词策略、法务口径** 的 Act 仍以产品/增长确认为准。
 
