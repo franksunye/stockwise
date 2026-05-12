@@ -17,6 +17,7 @@ import {
 import {
     buildPositionBudgetVerdict,
     computePositionBudget,
+    type PositionBudgetInput,
     type PositionBudgetRMode,
     type PositionBudgetVerdictStatus,
 } from '@/lib/position-budget';
@@ -134,6 +135,58 @@ function snapshotRMultiple(snapshot: PositionBudgetSnapshot): number | null {
     return Number.isFinite(multiple) ? multiple : null;
 }
 
+function snapshotToBudgetInput(snapshot: PositionBudgetSnapshot): PositionBudgetInput {
+    const pct =
+        snapshot.r_mode === 'percent_stop' && snapshot.entry_price > 0
+            ? (snapshot.entry_price - snapshot.stop_loss_price) / snapshot.entry_price
+            : null;
+    return {
+        accountSize: snapshot.account_size,
+        riskRatio: snapshot.risk_ratio,
+        entryPrice: snapshot.entry_price,
+        targetPrice: snapshot.target_price,
+        rMode: snapshot.r_mode,
+        systemStopLossPrice:
+            snapshot.r_mode === 'system_followed' ? snapshot.stop_loss_price : undefined,
+        fixedStopLossPrice: snapshot.r_mode === 'fixed_stop' ? snapshot.stop_loss_price : undefined,
+        stopPercent: snapshot.r_mode === 'percent_stop' && pct !== null ? pct : undefined,
+    };
+}
+
+function snapshotRiskSemantic(snapshot: PositionBudgetSnapshot): 'valid' | 'warning' | 'invalid' {
+    const verdict = buildPositionBudgetVerdict(computePositionBudget(snapshotToBudgetInput(snapshot)));
+    if (verdict.status === 'VALID') return 'valid';
+    if (verdict.status === 'WARNING') return 'warning';
+    return 'invalid';
+}
+
+const SNAPSHOT_SETUP_TYPE_LABEL_CLASS: Record<PositionBudgetSetupType, string> = {
+    breakout: 'text-sky-400',
+    pullback: 'text-purple-400',
+    trend_continuation: 'text-teal-400',
+    reversal: 'text-amber-400',
+    earnings: 'text-pink-400',
+    swing: 'text-indigo-400',
+    scalping: 'text-cyan-400',
+    other: 'text-slate-400',
+};
+
+function snapshotRiskDotClass(semantic: 'valid' | 'warning' | 'invalid'): string {
+    if (semantic === 'valid') {
+        return 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.45)]';
+    }
+    if (semantic === 'warning') {
+        return 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.42)]';
+    }
+    return 'bg-rose-400 shadow-[0_0_10px_rgba(251,113,133,0.42)]';
+}
+
+function snapshotRiskValueClass(semantic: 'valid' | 'warning' | 'invalid'): string {
+    if (semantic === 'valid') return 'text-emerald-200';
+    if (semantic === 'warning') return 'text-amber-200';
+    return 'text-rose-200';
+}
+
 const BUDGET_ERROR_KEYS: Record<string, MessageKey<'positionBudget'>> = {
     'Invalid account size': 'budgetErrors.invalidAccountSize',
     'Invalid risk ratio': 'budgetErrors.invalidRiskRatio',
@@ -195,6 +248,10 @@ export default function PositionBudgetToolPage() {
     const prefillAbortRef = useRef<AbortController | null>(null);
     const prefillSeqRef = useRef(0);
     const priceHistorySeqRef = useRef(0);
+
+    const [loadedSnapshotKey, setLoadedSnapshotKey] = useState<{ id: string; symbol: string } | null>(
+        null,
+    );
 
     const { watchlist, loading: watchlistLoading } = useWatchlist();
 
@@ -408,6 +465,7 @@ export default function PositionBudgetToolPage() {
     const handlePickStock = useCallback(
         (hit: { symbol: string; name?: string; name_en?: string | null; market?: string }) => {
             const normalized = hit.symbol.trim().toUpperCase();
+            setLoadedSnapshotKey((lk) => (lk && lk.symbol !== normalized ? null : lk));
             const next: SelectedStock = {
                 symbol: normalized,
                 name: hit.name,
@@ -437,6 +495,7 @@ export default function PositionBudgetToolPage() {
 
     const loadSnapshotAsCurrent = useCallback(
         (snapshot: PositionBudgetSnapshot) => {
+            setLoadedSnapshotKey({ id: snapshot.snapshot_id, symbol: snapshot.symbol });
             setSelected({ symbol: snapshot.symbol });
             void fetchPositionBudgetStockIdentity(snapshot.symbol).then((identity) => {
                 if (!identity) return;
@@ -513,6 +572,7 @@ export default function PositionBudgetToolPage() {
             }
             void refreshSnapshots();
             setBanner({ tone: 'success', text: t('successSaved') });
+            setLoadedSnapshotKey(null);
         } catch (error) {
             console.error('Save failed:', error);
             setBanner({ tone: 'error', text: t('errSaveGeneric') });
@@ -699,6 +759,7 @@ export default function PositionBudgetToolPage() {
                             <button
                                 onClick={() => {
                                     setSelected(null);
+                                    setLoadedSnapshotKey(null);
                                     setEntryPrice('');
                                     setTargetPrice('');
                                     setSystemStopLossPrice('');
@@ -1150,9 +1211,24 @@ export default function PositionBudgetToolPage() {
                                 const setupHeading = snapshot.setup_type
                                     ? setupTypeLabelsShort[snapshot.setup_type] ?? snapshot.setup_type
                                     : t('snapshotPlanType');
+                                const setupLabelClass =
+                                    snapshot.setup_type != null
+                                        ? SNAPSHOT_SETUP_TYPE_LABEL_CLASS[snapshot.setup_type]
+                                        : 'text-slate-400';
                                 const stopModeLabel =
                                     snapshotStopModeLabels[snapshot.r_mode] ?? snapshot.r_mode;
+                                const riskSemantic = snapshotRiskSemantic(snapshot);
+                                const riskValueClass = snapshotRiskValueClass(riskSemantic);
+                                const dotClass = snapshotRiskDotClass(riskSemantic);
+                                const isLoaded = loadedSnapshotKey?.id === snapshot.snapshot_id;
+                                const riskAria =
+                                    riskSemantic === 'valid'
+                                        ? t('snapshotRiskStateValid')
+                                        : riskSemantic === 'warning'
+                                          ? t('snapshotRiskStateWarning')
+                                          : t('snapshotRiskStateInvalid');
                                 const snapshotAriaPieces = [
+                                    `${riskAria}.`,
                                     t('loadSnapshot'),
                                     snapshot.symbol,
                                     `${t('snapshotStopType')} ${stopModeLabel}`,
@@ -1166,92 +1242,106 @@ export default function PositionBudgetToolPage() {
                                     `${t('snapshotRisk')} ${fmt(snapshot.expected_loss, 2, locale)}`,
                                     `${t('snapshotCreated')} ${fmtRelativeTime(snapshot.created_at, locale)}`,
                                 ];
+                                const cardToneClass = isLoaded
+                                    ? 'border-2 border-indigo-400/70 bg-white/[0.045] shadow-[0_0_28px_-8px_rgba(129,140,248,0.38)] ring-2 ring-indigo-500/25 ring-offset-2 ring-offset-[#050508]'
+                                    : 'border border-white/10 bg-white/[0.035] hover:bg-white/[0.065] hover:border-white/15';
                                 return (
-                                    <button
+                                    <div
                                         key={snapshot.snapshot_id}
-                                        type="button"
-                                        onClick={() => loadSnapshotAsCurrent(snapshot)}
-                                        className="min-w-[230px] sm:min-w-0 shrink-0 snap-start text-left rounded-[24px] border border-white/10 bg-white/[0.035] hover:bg-white/[0.07] active:scale-[0.99] transition-all p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
-                                        title={t('loadSnapshot')}
+                                        role="article"
                                         aria-label={snapshotAriaPieces.join('. ')}
+                                        className={`relative min-w-[260px] shrink-0 snap-start rounded-[24px] p-4 transition-colors ${cardToneClass}`}
                                     >
                                         <div className="flex items-start justify-between gap-3">
-                                            <div className="min-w-0 flex-1">
-                                                <p className="truncate text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                                            <div className="flex min-w-0 flex-1 items-center gap-2">
+                                                <span
+                                                    className={`h-2 w-2 shrink-0 rounded-full ${dotClass}`}
+                                                    aria-hidden
+                                                />
+                                                <p
+                                                    className={`truncate text-[10px] font-black uppercase tracking-[0.2em] ${setupLabelClass}`}
+                                                >
                                                     {setupHeading}
                                                 </p>
-                                                <p className="mt-1 truncate text-lg font-black italic tracking-tighter text-white">
-                                                    {snapshot.symbol}
-                                                </p>
                                             </div>
-                                            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 pt-0.5">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">
+                                            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
                                                     {t('snapshotStopType')}
                                                 </span>
-                                                <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[10px] font-bold tabular-nums text-slate-300">
+                                                <span className="rounded-md border border-white/10 bg-white/[0.08] px-2 py-0.5 text-[10px] font-bold tabular-nums text-slate-100">
                                                     {stopModeLabel}
                                                 </span>
                                             </div>
                                         </div>
 
-                                        <div className="mt-3 grid grid-cols-3 gap-x-2 gap-y-2 text-left border-t border-white/5 pt-3">
+                                        <p className="mt-3 truncate font-mono text-xl font-black italic tracking-tighter text-white sm:text-2xl">
+                                            {snapshot.symbol}
+                                        </p>
+
+                                        <div className="mt-4 grid grid-cols-3 gap-x-2 gap-y-2 border-t border-white/5 pt-4 text-left">
                                             <div className="min-w-0">
-                                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-600">
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
                                                     {t('snapshotEntryShort')}
                                                 </p>
-                                                <p className="mt-0.5 mono text-[11px] font-bold tabular-nums text-slate-200 truncate">
+                                                <p className="mt-0.5 mono text-[11px] font-bold tabular-nums text-slate-100 truncate">
                                                     {fmt(snapshot.entry_price, 2, locale)}
                                                 </p>
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-600">
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
                                                     {t('snapshotStopShort')}
                                                 </p>
-                                                <p className="mt-0.5 mono text-[11px] font-bold tabular-nums text-slate-200 truncate">
+                                                <p className="mt-0.5 mono text-[11px] font-bold tabular-nums text-slate-100 truncate">
                                                     {fmt(snapshot.stop_loss_price, 2, locale)}
                                                 </p>
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-600">
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
                                                     {t('snapshotTargetShort')}
                                                 </p>
-                                                <p className="mt-0.5 mono text-[11px] font-bold tabular-nums text-slate-200 truncate">
+                                                <p className="mt-0.5 mono text-[11px] font-bold tabular-nums text-slate-100 truncate">
                                                     {fmt(snapshot.target_price, 2, locale)}
                                                 </p>
                                             </div>
                                         </div>
 
-                                        <div className="mt-4 flex items-end justify-between gap-4">
-                                            <div>
-                                                <p className="mono text-3xl font-black tracking-tighter text-indigo-200 leading-none">
-                                                    {rMultipleText}
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="mono text-sm font-black text-white">
+                                        <div className="mt-5 flex items-end justify-between gap-4">
+                                            <p className="mono text-[2.0625rem] font-black tracking-tighter text-indigo-200 leading-none sm:text-[2.375rem]">
+                                                {rMultipleText}
+                                            </p>
+                                            <div className="pb-1 text-right">
+                                                <p className="mono text-base font-black text-white tabular-nums sm:text-lg">
                                                     {fmt(snapshot.position_size, 0, locale)}
                                                 </p>
-                                                <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                                <p className="mt-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
                                                     {t('sharesUnitCompact')}
                                                 </p>
                                             </div>
                                         </div>
 
-                                        <div className="mt-4 border-t border-white/5 pt-3">
+                                        <div className="mt-5 border-t border-white/5 pt-4 space-y-2">
                                             <div className="flex items-center justify-between gap-3 text-[11px] font-bold">
                                                 <span className="text-slate-500">{t('snapshotRisk')}</span>
-                                                <span className="mono text-rose-200">
+                                                <span className={`mono tabular-nums ${riskValueClass}`}>
                                                     {fmt(snapshot.expected_loss, 2, locale)}
                                                 </span>
                                             </div>
-                                            <div className="mt-2 flex items-center justify-between gap-3 text-[11px] font-bold">
+                                            <div className="flex items-center justify-between gap-3 text-[11px] font-bold">
                                                 <span className="text-slate-500">{t('snapshotCreated')}</span>
-                                                <span className="text-slate-300">
+                                                <span className="text-slate-300 tabular-nums">
                                                     {fmtRelativeTime(snapshot.created_at, locale)}
                                                 </span>
                                             </div>
                                         </div>
-                                    </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => loadSnapshotAsCurrent(snapshot)}
+                                            className="mt-5 w-full rounded-xl bg-indigo-600 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-white shadow-[0_10px_28px_-8px_rgba(99,102,241,0.55)] transition-all hover:bg-indigo-500 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0b10]"
+                                        >
+                                            {t('snapshotLoadCta')}
+                                        </button>
+                                    </div>
                                 );
                             })}
                             </div>
