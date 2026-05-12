@@ -54,11 +54,7 @@ jobs:
       - name: Verify latest GSC rows
         run: |
           python - <<'PY'
-          import os
-          import sys
-          sys.path.insert(0, os.path.abspath("backend"))
-
-          from database import get_connection
+          from backend.database import get_connection
 
           conn = get_connection()
           cur = conn.cursor()
