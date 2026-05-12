@@ -804,7 +804,7 @@ P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染
 }
 ```
 
-**离线 Cron 建议**：GSC **`date`** × **`page`** 先入 **`granularity:'page'`**；若配额允许再拉 **`page` × `query`** 填入 **`granularity:'query'`**。写完任一类行即 **可被 `GET`/Admin 读出**。
+**定时作业（已实现）**：`backend/scripts/daily_seo_search_ingest.py` — 与 **`daily_growth_digest.py --persist`** 同范式：`get_connection()`、`CREATE TABLE IF NOT EXISTS`、`--persist`。在 GitHub Actions 上见 **`.github/workflows/daily_seo_search_snapshot.yml`**（需在仓库 Secrets 增加 **`GSC_SITE_SCOPE`**，且同一服务账号须在 GSC「用户」中具备读权限）；默认复用 **`GA4_SERVICE_ACCOUNT_JSON` → `backend/keys/…json`**（JWT Scope 换成 **Search Console**，与 GA4 不同）。命令示例：`PYTHONPATH=. python backend/scripts/daily_seo_search_ingest.py --persist`（可先不加 `--persist` 看抓取行数）。
 
 ---
 
