@@ -543,7 +543,7 @@ export default function PositionBudgetToolPage() {
     const canSave = bootstrapped && !!selected && budget.ok && !saving;
     const verdict = useMemo(() => buildPositionBudgetVerdict(budget), [budget]);
     const stickyRMultiple = budget.rMultiple === null ? '—' : `${fmt(budget.rMultiple, 2, locale)}R`;
-    const snapshotModeLabels = useMemo(
+    const snapshotStopModeLabels = useMemo(
         () => ({
             system_followed: t('rMode.system_followed.shortLabel' as MessageKey<'positionBudget'>),
             fixed_stop: t('rMode.fixed_stop.shortLabel' as MessageKey<'positionBudget'>),
@@ -1158,13 +1158,15 @@ export default function PositionBudgetToolPage() {
                                 const tone = snapshotStatusTone(snapshot);
                                 const rMultiple = snapshotRMultiple(snapshot);
                                 const rMultipleText = rMultiple === null ? '—' : `${fmt(rMultiple, 2, locale)}R`;
-                                const modeLabel = snapshotModeLabels[snapshot.r_mode] ?? snapshot.r_mode;
                                 const setupHeading = snapshot.setup_type
                                     ? setupTypeLabelsShort[snapshot.setup_type] ?? snapshot.setup_type
                                     : t('snapshotPlanType');
+                                const stopModeLabel =
+                                    snapshotStopModeLabels[snapshot.r_mode] ?? snapshot.r_mode;
                                 const snapshotAriaPieces = [
                                     t('loadSnapshot'),
                                     snapshot.symbol,
+                                    `${t('snapshotStopType')} ${stopModeLabel}`,
                                     ...(snapshot.setup_type
                                         ? [setupTypeLabelsShort[snapshot.setup_type] ?? snapshot.setup_type]
                                         : []),
@@ -1198,13 +1200,19 @@ export default function PositionBudgetToolPage() {
                                             </div>
                                         </div>
 
+                                        <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">
+                                                {t('snapshotStopType')}
+                                            </span>
+                                            <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[10px] font-bold tabular-nums text-slate-300">
+                                                {stopModeLabel}
+                                            </span>
+                                        </div>
+
                                         <div className="mt-4 flex items-end justify-between gap-4">
                                             <div>
-                                                <p className="mono text-3xl font-black tracking-tighter text-indigo-200">
+                                                <p className="mono text-3xl font-black tracking-tighter text-indigo-200 leading-none">
                                                     {rMultipleText}
-                                                </p>
-                                                <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                                    {modeLabel}
                                                 </p>
                                             </div>
                                             <div className="text-right">

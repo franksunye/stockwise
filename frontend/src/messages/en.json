@@ -774,6 +774,7 @@
     "loadSnapshot": "Load as current parameters",
     "snapshotLoaded": "Loaded historical budget parameters; saving will create a new snapshot",
     "snapshotPlanType": "Budget Plan",
+    "snapshotStopType": "Stop type",
     "snapshotRisk": "Risk",
     "snapshotCreated": "Created",
     "noticeHeading": "Note",
@@ -802,7 +803,7 @@
       },
       "fixed_stop": {
         "label": "Price Stop",
-        "shortLabel": "Price",
+        "shortLabel": "Fixed",
         "hint": "Manual invalidation price"
       },
       "percent_stop": {

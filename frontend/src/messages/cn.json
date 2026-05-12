@@ -774,6 +774,7 @@
     "loadSnapshot": "载入为当前参数",
     "snapshotLoaded": "已载入历史预算参数；保存时会生成新的快照",
     "snapshotPlanType": "预算计划",
+    "snapshotStopType": "止损类型",
     "snapshotRisk": "风险",
     "snapshotCreated": "创建",
     "noticeHeading": "注意",
@@ -802,7 +803,7 @@
       },
       "fixed_stop": {
         "label": "价格止损",
-        "shortLabel": "价格",
+        "shortLabel": "固定",
         "hint": "手动输入止损价"
       },
       "percent_stop": {
