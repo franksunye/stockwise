@@ -10,6 +10,7 @@ source_docs:
   - "docs/3_Product/Specs/trade_management/56_Risk_Management_R_Multiple_Calculator_Spec_20260509.md"
   - "docs/1_Engineering/50_Plugin_Architecture_And_Extensibility_RFC_20260511.md"
   - "frontend/src/content/seo-position-budget.ts"
+  - "frontend/scripts/position-budget-seo-check.mjs"
 ---
 
 # 功能规格说明书：仓位预算插件版（Position Budget Plugin P0）(Spec 57)
@@ -639,6 +640,7 @@ P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染
 
 | 数据源 | 用途 | 频率 |
 | --- | --- | --- |
+| 自动化（仓库） | **`npm run check:position-budget-seo`**（`frontend/scripts/position-budget-seo-check.mjs`）：抓取线上 HTML / sitemap，校验 title/description/JSON-LD/收录路径 | **发版后或每月**（与 §14.4 Check 对齐）；`SEO_CHECK_BASE_URL` 可改预发 |
 | Google Search Console | 展示、点击、查询词、索引、体验 | 月度 |
 | Bing Webmaster | 补充搜索引擎可见度 | 月度 |
 | 站点 `sitemap.xml` | 确认 URL 仍被收录集合引用 | 发版后 / 季度 |
@@ -663,10 +665,11 @@ P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染
 
 #### Check（检查）
 
-1. **GSC**：该 URL 的查询词分布、CTR、抓取/索引异常。
-2. **Bing**：同步快速扫一眼。
-3. **GEO 抽样表**：跑固定问法，记录是否引用、错点类型（事实/合规/品牌）。
-4. **对照判据**：未达成则进入 Act；达成则沉淀为 **新基线**。
+1. **技术侧（仓库可执行）**：`cd frontend && npm run check:position-budget-seo`（或对预发设置 `SEO_CHECK_BASE_URL`），覆盖 **HTTP、`title`、`description`、JSON-LD、`SoftwareApplication`、sitemap 路径**。
+2. **GSC**：该 URL 的查询词分布、CTR、抓取/索引异常。
+3. **Bing**：同步快速扫一眼。
+4. **GEO 抽样表**：跑固定问法，记录是否引用、错点类型（事实/合规/品牌）。
+5. **对照判据**：未达成则进入 Act；达成则沉淀为 **新基线**。
 
 #### Act（处理）
 
@@ -689,6 +692,9 @@ P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染
 | 日期 | 周期 | Plan 摘要 | Do（PR/版本） | Check 结论 | Act |
 | --- | --- | --- | --- | --- | --- |
 | YYYY-MM-DD | 例：2026 Q2 |  |  |  |  |
+| 2026-05-12 | Cycle 0 · 基线 | 固化技术侧 Check：可重复的 HTML + sitemap 巡检；GSC/Bing/GEO 留作人工补栏 | Spec 与脚本落地；参见 `frontend/package.json` · `check:position-budget-seo` | 线上 spot-check：**HTTP 200**；`<title>` 含 Position Budget；`description` meta 存在；`application/ld+json` · `SoftwareApplication` 存在；`sitemap.xml` 含 `https://ziso.cc/tools/position-budget` | **基线**：后续周期对比；**待补**：GSC 索引与 query、Bing、GEO 抽样表（负责人填入本行或外链） |
+
+**负责人边界**：可由工程侧稳定执行 **脚本 + Spec 归档**（Do/Check 中技术块）；涉及 **GSC 权限、竞品词策略、法务口径** 的 Act 仍以产品/增长确认为准。
 
 ---
 

@@ -12,6 +12,7 @@
     "check:dashboard-interaction": "node scripts/dashboard-interaction-smoke.mjs",
     "check:dashboard-refresh": "node scripts/dashboard-refresh-smoke.mjs",
     "check:ssg-safety": "node scripts/check-ssg-safety.mjs",
+    "check:position-budget-seo": "node scripts/position-budget-seo-check.mjs",
     "check:user-center": "node scripts/user-center-smoke.mjs",
     "verify:dashboard-entry": "node scripts/verify-dashboard-entry.mjs",
     "verify:dashboard-interaction": "node scripts/verify-dashboard-interaction.mjs",
