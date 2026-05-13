@@ -711,9 +711,9 @@
     "share": "Share Report"
   },
   "positionBudget": {
-    "titleLine": "POSITION BUDGET",
-    "titleWordmark": "PLUGIN",
-    "subtitle": "RISK · 1R · SIZE",
+    "titleLine": "POSITION SIZE",
+    "titleWordmark": "CALCULATOR",
+    "subtitle": "STOCK RISK · STOP LOSS · R:R",
     "stepSelect": "① SELECT SYMBOL",
     "stepRisk": "② RISK INPUTS",
     "stepResult": "③ RESULT",

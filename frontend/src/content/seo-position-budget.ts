@@ -2,17 +2,75 @@ import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
 
 export const POSITION_BUDGET_CANONICAL_PATH = '/tools/position-budget';
 
-/** EN-first metadata; keywords include bilingual / cross-market cues for GEO + indexing. */
+export const positionBudgetGeoLocaleCopy = {
+  en: {
+    title: 'Position Size Calculator for Stocks',
+    description:
+      'Calculate stock position size from account risk, entry, stop loss, and risk-reward targets.',
+    keywords: [
+      'position size calculator',
+      'stock position size calculator',
+      'trading risk calculator',
+      'risk reward ratio calculator',
+      'risk to reward ratio calculator',
+    ],
+  },
+  cn: {
+    title: '仓位预算 / 头寸计算器',
+    description: '根据账户风险、入场价、止损价和风险收益比计算股票仓位。',
+    keywords: ['仓位预算', '头寸计算', '单笔风险控制', '止损仓位', 'R倍数'],
+  },
+  ko: {
+    title: 'Position Size Calculator | 포지션 사이즈 계산기',
+    description:
+      '계좌 위험, 진입가, 손절가, 위험 보상 비율을 기준으로 주식 포지션 크기를 계산합니다.',
+    keywords: [
+      'position size calculator',
+      '포지션 사이즈 계산기',
+      '주식 포지션 계산기',
+      '손절 계산기',
+      '위험 보상 비율 계산기',
+    ],
+  },
+  es: {
+    title: 'Calculadora de Trading para Tamaño de Posición',
+    description:
+      'Calcula el tamaño de posición en acciones a partir del riesgo de cuenta, precio de entrada, stop loss y ratio riesgo-beneficio.',
+    keywords: [
+      'position size calculator',
+      'calculadora trading',
+      'calculadora de trading',
+      'calculadora lotaje',
+      'calculadora de riesgo trading',
+    ],
+  },
+} as const;
+
+const positionBudgetGeoKeywords = Array.from(
+  new Set(Object.values(positionBudgetGeoLocaleCopy).flatMap((copy) => copy.keywords)),
+);
+
+/** EN-first metadata; keywords align to US search demand while keeping bilingual / cross-market cues for GEO. */
 export const positionBudgetSeoCopy = {
-  title: 'Position Budget — Shares, Risk & R-Multiples | ZISO AI',
+  title: 'Position Size Calculator for Stocks | Risk, Stop Loss & R:R | ZISO AI',
   description:
-    'Estimate position size from risk per trade, plus entry, stops, targets, and saved snapshots—for HK, US, and A-share workflows in your StockWise / ZISO workspace.',
+    'Calculate stock position size from account risk, entry, stop loss, and risk-reward targets. Save risk budget snapshots for HK, US, and A-share workflows in ZISO.',
   keywords: [
-    'position sizing',
+    'position size calculator',
+    'stock position size calculator',
+    'trading risk calculator',
+    'risk reward ratio calculator',
+    'risk to reward ratio calculator',
+    'stop loss calculator',
+    'stock stop loss calculator',
+    'position sizing calculator',
     'risk per trade',
+    'risk per trade calculator',
     'R-multiple calculator',
+    'R:R calculator',
     'stop-loss budget',
     'expected loss calculator',
+    'position budget',
     '仓位预算',
     '头寸计算',
     '单笔风险控制',
@@ -21,6 +79,14 @@ export const positionBudgetSeoCopy = {
     '港股仓位',
     '美股仓位',
     'A股仓位',
+    '포지션 사이즈 계산기',
+    '주식 포지션 계산기',
+    '손절 계산기',
+    '위험 보상 비율 계산기',
+    'calculadora trading',
+    'calculadora de trading',
+    'calculadora lotaje',
+    'calculadora de riesgo trading',
     'ZISO AI',
     'StockWise',
   ],
@@ -32,12 +98,37 @@ export function positionBudgetJsonLdScriptInnerHtml(): string {
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'ZISO Position Budget',
+    name: 'ZISO Position Size Calculator',
+    alternateName: [
+      'ZISO Position Budget',
+      'StockWise Position Budget',
+      positionBudgetGeoLocaleCopy.cn.title,
+      positionBudgetGeoLocaleCopy.ko.title,
+      positionBudgetGeoLocaleCopy.es.title,
+    ],
     applicationCategory: 'FinanceApplication',
+    applicationSubCategory: 'Stock position size calculator',
     operatingSystem: 'Web',
     url: `${origin}${POSITION_BUDGET_CANONICAL_PATH}`,
-    inLanguage: ['en-US', 'zh-CN'],
+    inLanguage: ['en-US', 'zh-CN', 'ko-KR', 'es-ES'],
     description: positionBudgetSeoCopy.description,
+    keywords: Array.from(new Set([...positionBudgetSeoCopy.keywords, ...positionBudgetGeoKeywords])).join(
+      ', ',
+    ),
+    featureList: [
+      'Stock position size calculation from account risk',
+      'Stop loss and risk per share budgeting',
+      'Risk-reward ratio and R-multiple estimation',
+      'Saved risk budget snapshots',
+    ],
+    hasPart: Object.entries(positionBudgetGeoLocaleCopy).map(([locale, copy]) => ({
+      '@type': 'WebPageElement',
+      name: copy.title,
+      inLanguage:
+        locale === 'cn' ? 'zh-CN' : locale === 'ko' ? 'ko-KR' : locale === 'es' ? 'es-ES' : 'en-US',
+      description: copy.description,
+      keywords: copy.keywords.join(', '),
+    })),
     offers: {
       '@type': 'Offer',
       price: '0',

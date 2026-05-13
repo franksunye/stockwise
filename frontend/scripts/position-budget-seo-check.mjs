@@ -32,7 +32,7 @@ function run() {
 
     const checks = [
       [`GET ${PAGE_PATH}`, res.ok],
-      ['<title> includes "Position Budget"', /<title>[^<]*Position Budget/i.test(text)],
+      ['<title> includes "Position Size Calculator"', /<title>[^<]*Position Size Calculator/i.test(text)],
       ['meta description present', /name=["']description["']/i.test(text)],
       ['JSON-LD (application/ld+json)', /application\/ld\+json/i.test(text)],
       ['JSON-LD type SoftwareApplication', /["']SoftwareApplication["']/i.test(text)],
