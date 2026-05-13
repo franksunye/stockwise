@@ -74,8 +74,13 @@ export async function EnglishLearnIndexPage() {
                             {article.slug.includes('-') ? article.slug.split('-')[1] : 'Intro'} · {article.readingTime} min read
                           </div>
                           <h3 className="text-lg font-bold text-slate-100 group-hover:text-white transition-colors leading-snug">
-                            {article.subtitle || article.title}
+                            {article.title}
                           </h3>
+                          {article.subtitle && (
+                            <p className="mt-3 text-sm leading-relaxed text-slate-500">
+                              {article.subtitle}
+                            </p>
+                          )}
                         </div>
                         <BookOpen size={18} className="text-slate-600 group-hover:text-indigo-400 transition-colors shrink-0" />
                       </div>
