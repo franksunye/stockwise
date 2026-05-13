@@ -11,6 +11,7 @@ source_docs:
   - "docs/1_Engineering/50_Plugin_Architecture_And_Extensibility_RFC_20260511.md"
   - "frontend/src/content/seo-position-budget.ts"
   - "frontend/scripts/position-budget-seo-check.mjs"
+  - "docs/4_Growth_Ops/52_Position_Budget_SEO_GEO_Aggressive_Expansion_20260513.md"
 ---
 
 # 功能规格说明书：仓位预算插件版（Position Budget Plugin P0）(Spec 57)
@@ -648,13 +649,26 @@ P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染
 
 **排除项**：`position budget` 仅保留为产品名 / 别名；Google Trends 相关查询出现 Title IX、budget airlines 等非交易意图，不作为主 SEO 入口词。`ZISO AI`、`ZISO`、`StockWise` 仅作品牌修饰，不进入本轮 5 个需求捕获关键词。
 
+**2026-05-13 · Cycle 2 aggressive expansion**
+
+为两周内观察更明确的 SEO/GEO 信号，关键词矩阵已从 5 个验证词扩展为约 50 个分层信号词，并沉淀为独立增长文档。2026-05-13 通过 Chrome 登录态复核 Google Trends 后，页面关键词实际保留 **54 个去重词**，上调 `share size calculator`、`risk per share`、`risk per trade`，下调 `1% rule` 与外汇 `lot/lotaje` 词。
+
+- `docs/4_Growth_Ops/52_Position_Budget_SEO_GEO_Aggressive_Expansion_20260513.md`
+- 对应代码源：`frontend/src/content/seo-position-budget.ts`
+
+执行口径：
+
+1. **不改主假设**：title / description 仍围绕 `position size calculator` + stock 场景，不在首屏塞满 50 个词。
+2. **关键词分层**：工具词、股票数量词、风险预算词、止损词、R:R / R 倍数词、ATR / 波动率词、中文/GEO 辅助词分别进入 metadata、JSON-LD、FAQ 与内容矩阵；`1%/2% rule` 只作为教育内容，不作为页面主信号。
+3. **内容支撑**：本轮建议从 4 篇已发布英文文章扩展到 **12 篇总量**（新增 8 篇高意图内容），而不是一次性做 20 篇；14 天后以 GSC/Bing query 分布决定是否继续扩到 20。
+
 **2026-05-13 · Google Trends（KR / ES / MX）国际化校准**
 
 | 地区 | 对比词 | Trends 信号 | 当前动作 |
 | --- | --- | --- | --- |
 | KR | `position size calculator` vs `포지션 사이즈 계산기` / `주식 포지션 계산기` / `손절 계산기` / `위험 보상 비율 계산기` | 英文词平均热度 **2**；韩文直译词为 **0**，相关查询不足 | 韩语 GEO 采用 **英文主词 + 韩文解释**，不把直译词作为唯一主入口 |
 | ES | `position size calculator` vs `calculadora de tamano de posicion` / `calculadora stop loss` / `calculadora riesgo beneficio` | 英文词平均热度 **5**；西语直译词为 **0**；相关查询出现 `tradingview +60%` | 西语页面保留英文主词；西语只做解释与辅助词 |
-| ES | `calculadora trading` / `calculadora lotaje` / `calculadora de riesgo trading` | `calculadora trading` 平均热度 **4**，`calculadora lotaje` **3**；`lotaje` 相关查询偏 Forex | 西语 GEO 加入 `calculadora trading` / `calculadora lotaje`，但产品口径仍限定为股票仓位，不承诺 Forex lot sizing |
+| ES | `calculadora trading` / `calculadora lotaje` / `calculadora de riesgo trading` | `calculadora trading` 平均热度 **4**，`calculadora lotaje` **3**；`lotaje` 相关查询偏 Forex | 西语 GEO 保留 `calculadora trading`；`lotaje` 经 Cycle 2 污染复核后已从页面关键词删除，除非未来支持 Forex lot sizing |
 | MX | `position size calculator` 直译组 | 整组趋势图数据不足；相关查询出现 `myfxbook position size calculator` | 墨西哥交易工具语义仍偏英文/外汇工具链 |
 | MX | `calculadora trading` / `calculadora lotaje` / `calculadora de riesgo trading` | `calculadora lotaje` **2**，`calculadora de riesgo trading` **2**；`calculadora trading` 平均 **0**，但 Top related query 为 `calculadora de trading` | 西语关键词包保留 `calculadora de trading` 与 `calculadora de riesgo trading`，作为长尾 GEO 语义 |
 
@@ -718,7 +732,8 @@ P0.1 的市场上下文应作为插件页的独立展示层实现，避免污染
 | YYYY-MM-DD | 例：2026 Q2 |  |  |  |  |
 | 2026-05-12 | Cycle 0 · 基线 | 固化技术侧 Check：可重复的 HTML + sitemap 巡检；GSC/Bing/GEO 留作人工补栏 | Spec 与脚本落地；参见 `frontend/package.json` · `check:position-budget-seo`；**另有** `.github/workflows/technical_seo_monitor.yml`（对生产域名 **全自动** cron + 触控路径触发） | 线上 spot-check：**HTTP 200**；`<title>` 含 Position Budget；`description` meta 存在；`application/ld+json` · `SoftwareApplication` 存在；`sitemap.xml` 含 `https://ziso.cc/tools/position-budget` | **基线**：后续周期对比；**待补**：GSC 索引与 query（已接库见 §14.6）、Bing、GEO 抽样表 |
 | 2026-05-13 | Cycle 1 · 需求词对齐 | Google Trends 显示 US 工具意图集中在 `position size calculator`，内部名 `position budget` 语义污染，不适合作主入口 | 更新 `frontend/src/content/seo-position-budget.ts` 与英文工具标题：主打 `position size calculator`，保留 `Position Budget` 为 JSON-LD 别名 | 待发布后跑 `check:position-budget-seo`，并在 14 天后对照 GSC/Bing query 与 GEO 抽样 | 若 `stock position size calculator` 或 R:R 词有展示，下一轮只补 FAQ/可见说明；若 CTR 下滑则回滚 title 假设 |
-| 2026-05-13 | Cycle 1b · 国际化 GEO 校准 | KR/ES/MX Trends 显示韩/西语直译词弱，交易工具用户仍常用英文或平台词；西语宽词 `calculadora trading` / `calculadora lotaje` 有少量信号 | 在 `seo-position-budget.ts` 增加 `positionBudgetGeoLocaleCopy`，把 `ko/es` 写入 JSON-LD 与 keywords；不新增伪 locale URL | 待发布后在 GSC 按国家 + 查询词检查 `KR/ES/MX` impressions；GEO 抽样问法增加韩语/西语 | 若西语 `lotaje` 词带来不匹配流量，下一轮从 keywords 降级到 FAQ 解释或移除 |
+| 2026-05-13 | Cycle 1b · 国际化 GEO 校准 | KR/ES/MX Trends 显示韩/西语直译词弱，交易工具用户仍常用英文或平台词；西语宽词 `calculadora trading` / `calculadora lotaje` 有少量信号 | 在 `seo-position-budget.ts` 增加 `positionBudgetGeoLocaleCopy`，把 `ko/es` 写入 JSON-LD 与 keywords；不新增伪 locale URL | 待发布后在 GSC 按国家 + 查询词检查 `KR/ES/MX` impressions；GEO 抽样问法增加韩语/西语 | Cycle 2 已确认 `lotaje` 偏 Forex/lot 错配，并从页面 keywords 删除 |
+| 2026-05-13 | Cycle 2 · 激进扩词与内容矩阵 | Chrome / Google Trends 复核显示长尾集中在 `share size calculator`、`risk per share`、`risk per trade`、stop loss、R:R、ATR stop；`1% rule` 弱，`lot/lotaje` 强但偏外汇 | `seo-position-budget.ts` 扩展到 **54 个去重 keywords**；删除 `lotaje`；新增 `52_Position_Budget_SEO_GEO_Aggressive_Expansion_20260513.md`，定义 12 篇内容矩阵（4 已有 + 8 新增） | D7 跑技术 Check；D14 对照 GSC/Bing query、国家、CTR 与 GEO 抽样 | 若出现 2 个以上长尾簇 impression，继续补对应文章；若出现 Forex/lot 错配流量，不回收 `lotaje`，除非产品支持 Forex lot sizing |
 
 **负责人边界**：可由工程侧稳定执行 **脚本 + Spec 归档**（Do/Check 中技术块）；涉及 **GSC 权限、竞品词策略、法务口径** 的 Act 仍以产品/增长确认为准。
 

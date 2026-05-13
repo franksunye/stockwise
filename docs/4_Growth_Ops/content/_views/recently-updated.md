@@ -1,14 +1,22 @@
 # 最近修订内容 (Recently Updated)
 
-> 自动生成时间：2026/5/13 17:10:55
+> 自动生成时间：2026/5/13 18:19:52
 > 说明：按最近 Git 变更时间排序，帮助团队快速识别近期被修改或维护的内容资产。
 
 | 标题 | 来源 | 漏斗 | 最后动作 | 维护状态 | 修订原因 | 主流程 | 视觉资产 | 溯源 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [How to Calculate Stock Position Size Before a Trade](../en/101_academy/calculate-stock-position-size-before-trade.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
-| [What Is a Position Size Calculator?](../en/101_academy/what-is-position-size-calculator.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
-| [How to Build a Post-Close Stock Research Routine](../en/101_academy/post-close-stock-research-routine.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [Pre-Trade Checklist: Entry, Stop, Target, Position Size](../en/101_academy/pre-trade-checklist-entry-stop-target-position-size.md) | Growth | BOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [Expected Loss Calculator: Know the Dollar Risk Before You Trade](../en/101_academy/expected-loss-calculator-before-trade.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [ATR Position Sizing: When a Wider Stop Means Fewer Shares](../en/101_academy/atr-position-sizing-wider-stop-fewer-shares.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [Risk Reward Ratio vs Position Size: Why R:R Is Not Enough](../en/101_academy/risk-reward-ratio-vs-position-size.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [Stop Loss Position Size Calculator: Why the Stop Decides the Size](../en/101_academy/stop-loss-position-size-calculator.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [Risk Per Trade Calculator: How Account Risk Becomes a Share Count](../en/101_academy/risk-per-trade-calculator-share-count.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [Risk Per Share vs Risk Per Trade: The Formula Behind Position Size](../en/101_academy/risk-per-share-vs-risk-per-trade.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [How Many Shares Should I Buy? Start With Risk Per Trade](../en/101_academy/how-many-shares-should-i-buy-risk-per-trade.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
 | [AI Stock Analysis: What It Can and Cannot Do](../en/101_academy/ai-stock-analysis-can-and-cannot-do.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [How to Calculate Stock Position Size Before a Trade](../en/101_academy/calculate-stock-position-size-before-trade.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [How to Build a Post-Close Stock Research Routine](../en/101_academy/post-close-stock-research-routine.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
+| [What Is a Position Size Calculator?](../en/101_academy/what-is-position-size-calculator.md) | Growth | MOFU | 2026-05-13 | created | seo_refresh | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
 | [通知开关：不喜欢就关了](../../../5_Support_Ops/content/cn/notification-preference.md) | Support | BOFU | 2026-04-27 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
 | [测测通没通：别被系统拦了](../../../5_Support_Ops/content/cn/push-debug.md) | Support | BOFU | 2026-04-27 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
 | [Free、Go、Plus、Pro、Alpha：差距在哪？](../../../5_Support_Ops/content/cn/tiers-explained.md) | Support | BOFU | 2026-04-27 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
@@ -27,11 +35,3 @@
 | [很多人不是亏在大跌里，而是亏在天天都有机会的行情里](../cn/101_academy/101-44_volatility_tax.md) | Growth | TOFU | 2026-04-17 | updated | copy_edit | 🚀 已发布 | 封面 ✅ 已通过<br>正文 ✅ 已通过<br>卡片 ✅ 已通过 | healthy |
 | [101-69: 很多亏损，不是没提醒，而是提醒太多把人带乱了](../cn/101_academy/101-69_ziso_rhythm.md) | Growth | BOFU | 2026-04-17 | updated | copy_edit | 🚀 已发布 | 封面 ✅ 已通过<br>正文 ✅ 已通过<br>卡片 ✅ 已通过 | healthy |
 | [交易大师图鉴 01｜马克·米勒维尼：他不是教你追涨，他是在教你只打最有把握的仗](../master_series/ms-01_mark_minervini.md) | Growth | TOFU | 2026-04-17 | stable | - | 🚀 已发布 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ❌ 缺失 | healthy |
-| [双轨制：前台生产线，后台实验线](../../../5_Support_Ops/content/cn/dual-lane-architecture.md) | Support | BOFU | 2026-03-19 | updated | product_change | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
-| [投资模式：切换你的策略风格](../../../5_Support_Ops/content/cn/investment-mode-config.md) | Support | BOFU | 2026-03-19 | updated | product_change | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
-| [模型层级划分：Pro 版与基础版 AI 引擎切流说明](../../../5_Support_Ops/content/cn/model-tiers-diff.md) | Support | BOFU | 2026-03-19 | updated | product_change | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
-| [按需更新：好钢用在刀刃上](../../../5_Support_Ops/content/cn/on-demand-sync.md) | Support | BOFU | 2026-03-19 | updated | product_change | 👀 待审核 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
-| [性能降级：省电也是战斗力](../../../5_Support_Ops/content/cn/perf-adaptation.md) | Support | BOFU | 2026-03-19 | updated | product_change | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
-| [极端容错解析：大波动时，ZISO 为什么不容易白屏？](../../../5_Support_Ops/content/cn/smart-parser-ui.md) | Support | BOFU | 2026-03-19 | updated | product_change | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
-| [错误溯源：什么是 Trace ID (Trace ID Audit)](../../../5_Support_Ops/content/cn/trace-id-audit.md) | Support | BOFU | 2026-03-19 | updated | product_change | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |
-| [零过期协议：尽量不让你看到旧价格](../../../5_Support_Ops/content/cn/zero-stale-guarantee.md) | Support | BOFU | 2026-03-19 | updated | product_change | ✍️ 生产中 | 封面 ❌ 缺失<br>正文 ❌ 缺失<br>卡片 ➖ 不需要 | healthy |

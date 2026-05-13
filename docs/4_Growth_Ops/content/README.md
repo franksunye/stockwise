@@ -1,6 +1,6 @@
 # 内容运营主索引 (Content Operations Registry)
 
-> 自动生成时间：2026/5/13 17:10:55
+> 自动生成时间：2026/5/13 18:19:52
 > 说明：本索引由 `scripts/cmo_sync.mjs` 统一扫描 `4_Growth_Ops/content` 与 `5_Support_Ops/content` 生成。
 > 日期规则：已发布内容优先显示公众号真实发布日期；未发布内容显示目标发布日期。
 > 公众号默认发布节奏：固定为 周一 / 周三 / 周五；除非团队明确调整，否则不自动变更。
@@ -259,8 +259,16 @@
 | [101-107: Level L3 — Systematic Portfolio Investment: The Fleet Command Center](en/101_academy/101-107_institutional_portfolio_l3.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [模型层级划分：Pro 版与基础版 AI 引擎切流说明](../../5_Support_Ops/content/cn/model-tiers-diff.md) | Support | guide | BOFU | - | 👀 待审核 | 2026-05-13 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [AI Stock Analysis: What It Can and Cannot Do](en/101_academy/ai-stock-analysis-can-and-cannot-do.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
+| [ATR Position Sizing: When a Wider Stop Means Fewer Shares](en/101_academy/atr-position-sizing-wider-stop-fewer-shares.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
+| [Expected Loss Calculator: Know the Dollar Risk Before You Trade](en/101_academy/expected-loss-calculator-before-trade.md) | Growth | article | MOFU | 转化承接 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
+| [How Many Shares Should I Buy? Start With Risk Per Trade](en/101_academy/how-many-shares-should-i-buy-risk-per-trade.md) | Growth | article | MOFU | 转化承接 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
 | [How to Build a Post-Close Stock Research Routine](en/101_academy/post-close-stock-research-routine.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
 | [How to Calculate Stock Position Size Before a Trade](en/101_academy/calculate-stock-position-size-before-trade.md) | Growth | article | MOFU | 转化承接 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
+| [Pre-Trade Checklist: Entry, Stop, Target, Position Size](en/101_academy/pre-trade-checklist-entry-stop-target-position-size.md) | Growth | article | BOFU | 转化承接 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
+| [Risk Per Share vs Risk Per Trade: The Formula Behind Position Size](en/101_academy/risk-per-share-vs-risk-per-trade.md) | Growth | article | MOFU | 转化承接 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
+| [Risk Per Trade Calculator: How Account Risk Becomes a Share Count](en/101_academy/risk-per-trade-calculator-share-count.md) | Growth | article | MOFU | 转化承接 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
+| [Risk Reward Ratio vs Position Size: Why R:R Is Not Enough](en/101_academy/risk-reward-ratio-vs-position-size.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
+| [Stop Loss Position Size Calculator: Why the Stop Decides the Size](en/101_academy/stop-loss-position-size-calculator.md) | Growth | article | MOFU | 转化承接 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
 | [What Is a Position Size Calculator?](en/101_academy/what-is-position-size-calculator.md) | Growth | article | MOFU | 转化承接 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
 | [101-108: L4级——极硬量化，是物理层面的毫秒之战](cn/101_academy/101-108_hard_quant_l4.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-15 周五 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [101-108: Level L4 — Hard Quant: The Millisecond War at the Physical Layer](en/101_academy/101-108_hard_quant_l4.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-15 周五 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |

@@ -1,14 +1,16 @@
 # Content Traceability Matrix 溯源总控表
 
 > 这是一份由 `/content-audit` 命令自动生成的核心物料与外部发布内容追踪表。
-> **生成时间**: 2026-04-03T09:05:32.539Z
+> **生成时间**: 2026-05-13T10:20:41.275Z
 
 ## 🚨 预警区：逻辑过期风险 (Outdated)
 
 底层战略/工程文档已经更新，对应的外部内容需要复核以防止文案逻辑冲突。
 
+- 🔴 [`docs/4_Growth_Ops/content/April_Content_Matrix_Engineering_2026.md`](../../docs/4_Growth_Ops/content/April_Content_Matrix_Engineering_2026.md) -> 需复核底层更新 `docs/1_Engineering/31_Capacity_Planning_And_Scaling_Strategy_20260317.md`
 - 🔴 [`docs/4_Growth_Ops/content/GRSAI_IMAGE_TOOL.md`](../../docs/4_Growth_Ops/content/GRSAI_IMAGE_TOOL.md) -> 需复核底层更新 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md`
 - 🔴 [`docs/4_Growth_Ops/content/IMAGE_GENERATION_WORKFLOW.md`](../../docs/4_Growth_Ops/content/IMAGE_GENERATION_WORKFLOW.md) -> 需复核底层更新 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md`
+- 🔴 [`docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`](../../docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md) -> 需复核底层更新 `docs/0_Strategy/09_Decision_Stack_and_Producer_Architecture.md`
 - 🔴 [`docs/4_Growth_Ops/content/March_Content_Matrix_Execution_2026.md`](../../docs/4_Growth_Ops/content/March_Content_Matrix_Execution_2026.md) -> 需复核底层更新 `docs/0_Strategy/07_Growth_and_GTM_Roadmap.md`
 - 🔴 [`docs/4_Growth_Ops/content/WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL.md`](../../docs/4_Growth_Ops/content/WECHAT_LAYOUT_PLAYBOOK_FINANCE_EDITORIAL.md) -> 需复核底层更新 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md`
 - 🔴 [`docs/4_Growth_Ops/content/WECHAT_VISUAL_PLAYBOOK_10W_2026Q2.md`](../../docs/4_Growth_Ops/content/WECHAT_VISUAL_PLAYBOOK_10W_2026Q2.md) -> 需复核底层更新 `docs/4_Growth_Ops/46_Content_Operations_System_Blueprint.md`
@@ -29,7 +31,7 @@
 
 如果某篇内容引用的上游文档还没有补齐 `doc_id / doc_domain / doc_status`，系统虽可追踪路径，但还不能稳定判断它是否属于现行事实源。
 
-- *当前被引用的源文档都已具备最小元数据*
+- 🟡 `docs/4_Growth_Ops/content/README.md` 缺少 `doc_id`, `doc_domain`, `doc_status`；当前影响 1 篇内容（例如：`docs/4_Growth_Ops/content/MASTER_SERIES_CONTENT_INTEGRATION_2026.md`）
 
 ## 💡 IP 闲置榜 (Under-utilized Internal Docs)
 
@@ -41,7 +43,6 @@
 - 🔵 [`docs/0_Strategy/03_Team_Responsibility_Matrix.md`](../../docs/0_Strategy/03_Team_Responsibility_Matrix.md)
 - 🔵 [`docs/0_Strategy/04_Milestones_Execution_Log.md`](../../docs/0_Strategy/04_Milestones_Execution_Log.md)
 - 🔵 [`docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md`](../../docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md)
-- 🔵 [`docs/0_Strategy/08_Globalization_Strategy_and_Evolution.md`](../../docs/0_Strategy/08_Globalization_Strategy_and_Evolution.md)
 - 🔵 [`docs/0_Strategy/10_RFC_2026Q2_GTM_and_Product_Strategy_Pivot.md`](../../docs/0_Strategy/10_RFC_2026Q2_GTM_and_Product_Strategy_Pivot.md)
 - 🔵 [`docs/0_Strategy/history/MILESTONE_2025.md`](../../docs/0_Strategy/history/MILESTONE_2025.md)
 - 🔵 [`docs/2_Intelligence/20_Doc_Index_and_Governance.md`](../../docs/2_Intelligence/20_Doc_Index_and_Governance.md)
@@ -85,7 +86,6 @@
 - 🔵 [`docs/1_Engineering/24_AICouncil_Review_Opinion_Current_State_20260313.md`](../../docs/1_Engineering/24_AICouncil_Review_Opinion_Current_State_20260313.md)
 - 🔵 [`docs/1_Engineering/25_AICouncil_Collaboration_Routes_20260318.md`](../../docs/1_Engineering/25_AICouncil_Collaboration_Routes_20260318.md)
 - 🔵 [`docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md`](../../docs/1_Engineering/25_Onboarding_First_Load_Recovery_Plan_20260314.md)
-- 🔵 [`docs/1_Engineering/26_Global_First_ISR_Architecture_Design.md`](../../docs/1_Engineering/26_Global_First_ISR_Architecture_Design.md)
 - 🔵 [`docs/1_Engineering/27_API_Data_Payload_Optimization.md`](../../docs/1_Engineering/27_API_Data_Payload_Optimization.md)
 - 🔵 [`docs/1_Engineering/29_Almanac_Data_Lightweight_Protocol_20260316.md`](../../docs/1_Engineering/29_Almanac_Data_Lightweight_Protocol_20260316.md)
 - 🔵 [`docs/1_Engineering/30_Stock_Data_Layers_And_API_Boundaries_20260316.md`](../../docs/1_Engineering/30_Stock_Data_Layers_And_API_Boundaries_20260316.md)
@@ -103,7 +103,12 @@
 - 🔵 [`docs/1_Engineering/42_Trade_Management_Research_Architecture_20260327.md`](../../docs/1_Engineering/42_Trade_Management_Research_Architecture_20260327.md)
 - 🔵 [`docs/1_Engineering/43_Trade_Management_POC_02171_20260328.md`](../../docs/1_Engineering/43_Trade_Management_POC_02171_20260328.md)
 - 🔵 [`docs/1_Engineering/44_CEnd_Trade_Management_Phase0_Implementation_Plan_20260330.md`](../../docs/1_Engineering/44_CEnd_Trade_Management_Phase0_Implementation_Plan_20260330.md)
-- 🔵 [`docs/1_Engineering/GLOBALIZATION_IMPLEMENTATION_DESIGN.md`](../../docs/1_Engineering/GLOBALIZATION_IMPLEMENTATION_DESIGN.md)
+- 🔵 [`docs/1_Engineering/45_International_V1_Release_Engineering_Review_20260411.md`](../../docs/1_Engineering/45_International_V1_Release_Engineering_Review_20260411.md)
+- 🔵 [`docs/1_Engineering/46_International_Onboarding_Performance_Optimization_Plan_20260416.md`](../../docs/1_Engineering/46_International_Onboarding_Performance_Optimization_Plan_20260416.md)
+- 🔵 [`docs/1_Engineering/47_Prediction_Pipeline_Scaling_RFC_20260428.md`](../../docs/1_Engineering/47_Prediction_Pipeline_Scaling_RFC_20260428.md)
+- 🔵 [`docs/1_Engineering/48_Domain_Model_Consolidation_RFC_20260428.md`](../../docs/1_Engineering/48_Domain_Model_Consolidation_RFC_20260428.md)
+- 🔵 [`docs/1_Engineering/49_Schema_Long_Term_Shape_Notes_20260428.md`](../../docs/1_Engineering/49_Schema_Long_Term_Shape_Notes_20260428.md)
+- 🔵 [`docs/1_Engineering/50_Plugin_Architecture_And_Extensibility_RFC_20260511.md`](../../docs/1_Engineering/50_Plugin_Architecture_And_Extensibility_RFC_20260511.md)
 - 🔵 [`docs/1_Engineering/LLM_Debug_Traces/0_Handover_Report.md`](../../docs/1_Engineering/LLM_Debug_Traces/0_Handover_Report.md)
 - 🔵 [`docs/1_Engineering/LLM_Debug_Traces/B2_LAB_VS_B2_PROD_SAFE_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/B2_LAB_VS_B2_PROD_SAFE_20260312.md)
 - 🔵 [`docs/1_Engineering/LLM_Debug_Traces/B2_PRODUCTION_MIGRATION_PLAN_20260312.md`](../../docs/1_Engineering/LLM_Debug_Traces/B2_PRODUCTION_MIGRATION_PLAN_20260312.md)
@@ -145,6 +150,11 @@
 - 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/Baseline_Old_System.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/Baseline_Old_System.md)
 - 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/Baseline_Old_User.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/Baseline_Old_User.md)
 - 🔵 [`docs/1_Engineering/LLM_Debug_Traces/prompts/Shared_Optimized_System.md`](../../docs/1_Engineering/LLM_Debug_Traces/prompts/Shared_Optimized_System.md)
+- 🔵 [`docs/1_Engineering/i18n/00_Globalization_Strategy_V2.md`](../../docs/1_Engineering/i18n/00_Globalization_Strategy_V2.md)
+- 🔵 [`docs/1_Engineering/i18n/01_Stock_Name_Internationalization.md`](../../docs/1_Engineering/i18n/01_Stock_Name_Internationalization.md)
+- 🔵 [`docs/1_Engineering/i18n/02_Global_First_ISR_Architecture.md`](../../docs/1_Engineering/i18n/02_Global_First_ISR_Architecture.md)
+- 🔵 [`docs/1_Engineering/i18n/03_Globalization_Strategy_and_Evolution.md`](../../docs/1_Engineering/i18n/03_Globalization_Strategy_and_Evolution.md)
+- 🔵 [`docs/1_Engineering/i18n/04_App_Locale_Resolution_Model.md`](../../docs/1_Engineering/i18n/04_App_Locale_Resolution_Model.md)
 - 🔵 [`docs/1_Engineering/legacy_designs/Stock_News_Fetching.md`](../../docs/1_Engineering/legacy_designs/Stock_News_Fetching.md)
 - 🔵 [`docs/1_Engineering/legacy_designs/Technical_Design.md`](../../docs/1_Engineering/legacy_designs/Technical_Design.md)
 - 🔵 [`docs/1_Engineering/legacy_designs/refactoring-dashboard-page.md`](../../docs/1_Engineering/legacy_designs/refactoring-dashboard-page.md)
@@ -162,10 +172,13 @@
 - 🔵 [`docs/3_Product/Specs/47_Investment_Mode_Product_Layer.md`](../../docs/3_Product/Specs/47_Investment_Mode_Product_Layer.md)
 - 🔵 [`docs/3_Product/Specs/49_Investment_Mode_Decision_Local_Snapshot_Spec_20260316.md`](../../docs/3_Product/Specs/49_Investment_Mode_Decision_Local_Snapshot_Spec_20260316.md)
 - 🔵 [`docs/3_Product/Specs/50_VCP_Visualization_Transparency_Spec.md`](../../docs/3_Product/Specs/50_VCP_Visualization_Transparency_Spec.md)
+- 🔵 [`docs/3_Product/Specs/55_ZISO_2_0_Second_Panel_Spec_20260428.md`](../../docs/3_Product/Specs/55_ZISO_2_0_Second_Panel_Spec_20260428.md)
 - 🔵 [`docs/3_Product/Specs/trade_management/51_CEnd_Trade_Management_Open_Spec_20260330.md`](../../docs/3_Product/Specs/trade_management/51_CEnd_Trade_Management_Open_Spec_20260330.md)
 - 🔵 [`docs/3_Product/Specs/trade_management/52_CEnd_Trade_Management_Phase0_UX_Review_20260330.md`](../../docs/3_Product/Specs/trade_management/52_CEnd_Trade_Management_Phase0_UX_Review_20260330.md)
 - 🔵 [`docs/3_Product/Specs/trade_management/53_Trade_Management_CN_HK_Market_Aware_Routing_Spec_20260331.md`](../../docs/3_Product/Specs/trade_management/53_Trade_Management_CN_HK_Market_Aware_Routing_Spec_20260331.md)
 - 🔵 [`docs/3_Product/Specs/trade_management/54_HK_Trade_Management_Value_Proof_20260331.md`](../../docs/3_Product/Specs/trade_management/54_HK_Trade_Management_Value_Proof_20260331.md)
+- 🔵 [`docs/3_Product/Specs/trade_management/56_Risk_Management_R_Multiple_Calculator_Spec_20260509.md`](../../docs/3_Product/Specs/trade_management/56_Risk_Management_R_Multiple_Calculator_Spec_20260509.md)
+- 🔵 [`docs/3_Product/Specs/trade_management/57_Position_Budget_Plugin_P0_Spec_20260511.md`](../../docs/3_Product/Specs/trade_management/57_Position_Budget_Plugin_P0_Spec_20260511.md)
 - 🔵 [`docs/3_Product/UX_Design/UX_Concept_TikTok_Weather.md`](../../docs/3_Product/UX_Design/UX_Concept_TikTok_Weather.md)
 - 🔵 [`docs/3_Product/legacy_specs/42_Product_Updates_4_States_Semantic_Upgrade.md`](../../docs/3_Product/legacy_specs/42_Product_Updates_4_States_Semantic_Upgrade.md)
 - 🔵 [`docs/3_Product/legacy_specs/Membership_Design_Plan.md`](../../docs/3_Product/legacy_specs/Membership_Design_Plan.md)

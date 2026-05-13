@@ -1,12 +1,21 @@
 # 产品变更影响视图 (Change Impact Board)
 
-> 自动生成时间：2026/5/13 17:10:55
+> 自动生成时间：2026/5/13 18:19:52
 > 说明：该视图用于回答“产品/工程文档变化后，哪些内容应该复核或补充”。
 
 ## 受底层文档变更影响，需优先复核的内容
 
 | 内容资产 | 来源 | 主流程 | 受影响源文档 |
 | --- | --- | --- | --- |
+| [ATR Position Sizing: When a Wider Stop Means Fewer Shares](../en/101_academy/atr-position-sizing-wider-stop-fewer-shares.md) | Growth | 🚀 已发布 | `docs/4_Growth_Ops/52_Position_Budget_SEO_GEO_Aggressive_Expansion_20260513.md` |
+| [Expected Loss Calculator: Know the Dollar Risk Before You Trade](../en/101_academy/expected-loss-calculator-before-trade.md) | Growth | 🚀 已发布 | `docs/4_Growth_Ops/52_Position_Budget_SEO_GEO_Aggressive_Expansion_20260513.md` |
+| [How Many Shares Should I Buy? Start With Risk Per Trade](../en/101_academy/how-many-shares-should-i-buy-risk-per-trade.md) | Growth | 🚀 已发布 | `docs/4_Growth_Ops/52_Position_Budget_SEO_GEO_Aggressive_Expansion_20260513.md` |
+| [Pre-Trade Checklist: Entry, Stop, Target, Position Size](../en/101_academy/pre-trade-checklist-entry-stop-target-position-size.md) | Growth | 🚀 已发布 | `docs/4_Growth_Ops/52_Position_Budget_SEO_GEO_Aggressive_Expansion_20260513.md` |
+| [Risk Per Share vs Risk Per Trade: The Formula Behind Position Size](../en/101_academy/risk-per-share-vs-risk-per-trade.md) | Growth | 🚀 已发布 | `docs/4_Growth_Ops/52_Position_Budget_SEO_GEO_Aggressive_Expansion_20260513.md` |
+| [Risk Per Trade Calculator: How Account Risk Becomes a Share Count](../en/101_academy/risk-per-trade-calculator-share-count.md) | Growth | 🚀 已发布 | `docs/4_Growth_Ops/52_Position_Budget_SEO_GEO_Aggressive_Expansion_20260513.md` |
+| [Risk Reward Ratio vs Position Size: Why R:R Is Not Enough](../en/101_academy/risk-reward-ratio-vs-position-size.md) | Growth | 🚀 已发布 | `docs/4_Growth_Ops/52_Position_Budget_SEO_GEO_Aggressive_Expansion_20260513.md` |
+| [Stop Loss Position Size Calculator: Why the Stop Decides the Size](../en/101_academy/stop-loss-position-size-calculator.md) | Growth | 🚀 已发布 | `docs/4_Growth_Ops/52_Position_Budget_SEO_GEO_Aggressive_Expansion_20260513.md` |
+| [大师系列内容接入方案 2026](../MASTER_SERIES_CONTENT_INTEGRATION_2026.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/README.md` |
 | [101-69: 很多亏损，不是没提醒，而是提醒太多把人带乱了](../cn/101_academy/101-69_ziso_rhythm.md) | Growth | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 | [我们为什么阉割了你的盘中提示金牌？因为无知等于平安](../cn/101_academy/101-75_notification_diet.md) | Growth | ✍️ 生产中 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 | [“秒应”极速感：为了让你不焦虑，我们在重写物理法则](../cn/101_academy/101-79_optimistic_ui.md) | Growth | ✍️ 生产中 | `docs/3_Product/30_Notification_Strategy_Design.md` |
@@ -19,7 +28,6 @@
 | [推送指南：不错过每一秒](../../../5_Support_Ops/content/cn/web-push-setup.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 | [Signal-Flip Push: Only for Major Reversals](../../../5_Support_Ops/content/en/signal-flip-push.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
 | [Web Push Setup: Enable Alerts Properly](../../../5_Support_Ops/content/en/web-push-setup.md) | Support | 🚀 已发布 | `docs/3_Product/30_Notification_Strategy_Design.md` |
-| [大师系列内容接入方案 2026](../MASTER_SERIES_CONTENT_INTEGRATION_2026.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/README.md` |
 | [交易大师图鉴 13｜波动收缩形态（VCP）：真正迷人的，不是那个图形，而是市场在突破前最后一次“阻力排查”。](../master_series/ms-13_vcp.md) | Growth | ✍️ 生产中 | `docs/4_Growth_Ops/content/master_series/ms-01_mark_minervini.md` |
 | [深度链接：一键直达“战场”](../../../5_Support_Ops/content/cn/deep-linking-usage.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
 | [交互优先：手感不能断](../../../5_Support_Ops/content/cn/interaction-first.md) | Support | 🚀 已发布 | `docs/3_Product/Specs/46_Frontend_SWR_Architecture_Upgrade.md` |
@@ -49,14 +57,6 @@
 | [101-16: 组合的假象：买了 5 只白酒股，你以为分散了风险？](../cn/101_academy/101-16_fake_diversification.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 | [内幕消息错觉：送上门的“内幕”，全是为你准备的绞肉机](../cn/101_academy/101-19_insider_illusion.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 | [信息节食：屏蔽大 V 的 30 天，我的账户为何起死回生](../cn/101_academy/101-20_information_diet.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-33: 为什么你的指标总是变成反指？](../cn/101_academy/101-33_indicator_failure.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-34: 把“止损”推迟到明天的代价](../cn/101_academy/101-34_mae_cost.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-35: 回测与未来的鸿沟](../cn/101_academy/101-35_overfitting_trap.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [101-36: 滑点与印花税：杀死回测富翁的毒药](../cn/101_academy/101-36_slippage_poison.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [机会成本：很多人不是没机会，而是钱先被一只烂股拖住了](../cn/101_academy/101-40_opportunity_cost.md) | Growth | 🚀 已发布 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [向下摊平：在错误的泥潭里越陷越深的死亡操作](../cn/101_academy/101-41_avg_down_trap.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [均值回归：万物皆周期，涨上天的终将跌回均线](../cn/101_academy/101-43_mean_reversion.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
-| [时间价值陷阱：横盘不仅折磨心智，更是对资金使用率的谋杀](../cn/101_academy/101-45_time_decay.md) | Growth | ✍️ 生产中 | `docs/0_Strategy/05_Quant_Signal_and_Execution_Axioms.md` |
 
 ## 尚未被转化成内容资产的内部文档机会
 
