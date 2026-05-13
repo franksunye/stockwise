@@ -1,6 +1,6 @@
 # 内容运营主索引 (Content Operations Registry)
 
-> 自动生成时间：2026/4/17 19:03:53
+> 自动生成时间：2026/5/13 17:10:55
 > 说明：本索引由 `scripts/cmo_sync.mjs` 统一扫描 `4_Growth_Ops/content` 与 `5_Support_Ops/content` 生成。
 > 日期规则：已发布内容优先显示公众号真实发布日期；未发布内容显示目标发布日期。
 > 公众号默认发布节奏：固定为 周一 / 周三 / 周五；除非团队明确调整，否则不自动变更。
@@ -76,7 +76,7 @@
 | [把耐心当作武器：猎手总是趴在雪地里最久的那一个](cn/101_academy/101-96_patience_as_a_weapon.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-04-02 |
 | [绑定邮箱：唯一的“救命稻草”](../../5_Support_Ops/content/cn/email-sync-logic.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [本金至上：哪怕错过一百次机会，也不要犯一次致命错误](cn/101_academy/101-90_capital_preservation.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-04-02 |
-| [测测通没通：别被系统拦了](../../5_Support_Ops/content/cn/push-debug.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
+| [测测通没通：别被系统拦了](../../5_Support_Ops/content/cn/push-debug.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-27 |
 | [超越交易：用量化思维审视人生风险的终局](cn/101_academy/101-100_beyond_trading.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-04-02 |
 | [触反馈：心跳与信号同步](../../5_Support_Ops/content/cn/haptic-sync.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [触觉共振：手机的震动，如何将量化纪律直接刻入你的潜意识](cn/101_academy/101-80_haptic_resonance.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-04-02 |
@@ -120,7 +120,7 @@
 | [四态语义验证规则（修订版）](../../5_Support_Ops/content/cn/four-state-validation-rules.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [随机游走假说：承认市场短期的不可预测性，是走向成熟的第一步](cn/101_academy/101-47_random_walk.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-04-02 |
 | [体验期权限发放规则 (Onboarding Trial Rules)](../../5_Support_Ops/content/cn/onboarding-trial-rules.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
-| [通知开关：不喜欢就关了](../../5_Support_Ops/content/cn/notification-preference.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
+| [通知开关：不喜欢就关了](../../5_Support_Ops/content/cn/notification-preference.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-27 |
 | [推荐激励：有福同享](../../5_Support_Ops/content/cn/referral-rewards.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [推送指南：不错过每一秒](../../5_Support_Ops/content/cn/web-push-setup.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [尾部风险：如何防范那些由于“不可能”而让你倾家荡产的小概率事件](cn/101_academy/101-48_tail_risk.md) | Growth | article | TOFU | - | ✍️ 生产中 | 2026-03-19 周四 | ✅ 上线中 | 📝 草稿 | 2026-04-02 |
@@ -151,11 +151,9 @@
 | [Action Semantics: Entry, Observe, Defense, No Signal](../../5_Support_Ops/content/en/four-states-semantics.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [AI 分析师人设框架的边界 (Analyst Personas)](../../5_Support_Ops/content/cn/analyst-personas.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
 | [Android 通知限制说明](../../5_Support_Ops/content/cn/android-notification-limit.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
-| [Free 与 Pro：差距在哪？](../../5_Support_Ops/content/cn/tiers-explained.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
-| [Free vs Go vs Plus: What's Different in v1?](../../5_Support_Ops/content/en/tiers-explained.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
+| [Free、Go、Plus、Pro、Alpha：差距在哪？](../../5_Support_Ops/content/cn/tiers-explained.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-27 |
 | [Investment Mode: Switching Your Strategy Style](../../5_Support_Ops/content/en/investment-mode-config.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [iOS 特供：极致跟手感](../../5_Support_Ops/content/cn/ios-tuning.md) | Support | article | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-02 |
-| [Notification Preferences: Control the Signal](../../5_Support_Ops/content/en/notification-preference.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [Onboarding Trial: What You Unlock and What Happens After](../../5_Support_Ops/content/en/onboarding-trial-rules.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [Privacy Pledge: This is Your Safe Harbor](../../5_Support_Ops/content/en/privacy-pledge.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [Redeem Code: Activate Campaign Access](../../5_Support_Ops/content/en/redeem-code-usage.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-03-19 周四 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
@@ -247,6 +245,8 @@
 | [黑天鹅数学：你以为十年一遇，市场却隔三差五就教你做人](cn/101_academy/101-37_black_swan_math.md) | Growth | article | TOFU | 破圈钩子 | 👀 待审核 | 2026-04-22 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-70: AI 最危险的时候，不是它不聪明，而是你想冲时它也跟着你喊冲](cn/101_academy/101-70_ai_guardrails.md) | Growth | article | BOFU | 转化承接 | ✍️ 生产中 | 2026-04-24 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-32: 市场根本不在乎你亏了多少，只有你自己还在死守成本线](cn/101_academy/101-32_stateless_execution.md) | Growth | article | MOFU | 信任桥梁 | 👀 待审核 | 2026-04-27 周一 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
+| [Free vs Go vs Plus: What's Different in v1?](../../5_Support_Ops/content/en/tiers-explained.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-27 周一 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
+| [Notification Preferences: Control the Signal](../../5_Support_Ops/content/en/notification-preference.md) | Support | guide | BOFU | - | 🚀 已发布 | 2026-04-27 周一 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [投资模式：切换你的策略风格](../../5_Support_Ops/content/cn/investment-mode-config.md) | Support | guide | BOFU | 转化承接 | 👀 待审核 | 2026-04-29 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
 | [101-106: 真正的 L2，不是会背几条规则，而是知道规则一失灵就该认错](cn/101_academy/101-106_systematic_rules_l2.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-05-01 周五 | ✅ 上线中 | 📝 草稿 | 2026-04-03 |
 | [Maturity Level L2: Systematic Rule Governance via DeepSeek-V3 Intelligence](en/101_academy/101-106_systematic_rules_l2.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-05-01 周五 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
@@ -258,6 +258,10 @@
 | [101-107: L3级——系统化组合投资，是舰队司令部的排兵布阵](cn/101_academy/101-107_institutional_portfolio_l3.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [101-107: Level L3 — Systematic Portfolio Investment: The Fleet Command Center](en/101_academy/101-107_institutional_portfolio_l3.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [模型层级划分：Pro 版与基础版 AI 引擎切流说明](../../5_Support_Ops/content/cn/model-tiers-diff.md) | Support | guide | BOFU | - | 👀 待审核 | 2026-05-13 周三 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |
+| [AI Stock Analysis: What It Can and Cannot Do](en/101_academy/ai-stock-analysis-can-and-cannot-do.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
+| [How to Build a Post-Close Stock Research Routine](en/101_academy/post-close-stock-research-routine.md) | Growth | article | MOFU | 信任桥梁 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
+| [How to Calculate Stock Position Size Before a Trade](en/101_academy/calculate-stock-position-size-before-trade.md) | Growth | article | MOFU | 转化承接 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
+| [What Is a Position Size Calculator?](en/101_academy/what-is-position-size-calculator.md) | Growth | article | MOFU | 转化承接 | 🚀 已发布 | 2026-05-13 周三 | ✅ 上线中 | ➖ 不发布 | 2026-05-13 |
 | [101-108: L4级——极硬量化，是物理层面的毫秒之战](cn/101_academy/101-108_hard_quant_l4.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-15 周五 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [101-108: Level L4 — Hard Quant: The Millisecond War at the Physical Layer](en/101_academy/101-108_hard_quant_l4.md) | Growth | article | MOFU | - | 🚀 已发布 | 2026-05-15 周五 | ✅ 上线中 | ➖ 不发布 | 2026-04-03 |
 | [按需更新：好钢用在刀刃上](../../5_Support_Ops/content/cn/on-demand-sync.md) | Support | guide | BOFU | 转化承接 | 👀 待审核 | 2026-05-15 周五 | ✅ 上线中 | 📝 草稿 | 2026-03-19 |

@@ -1,6 +1,6 @@
 # 周运营驾驶舱 (Ops Weekly Cockpit)
 
-> 自动生成时间：2026/4/17 19:03:53
+> 自动生成时间：2026/5/13 17:10:55
 > 说明：给内容运营周会使用，快速判断“哪些要先做、谁手里最满、未来两周是否会卡档期”。
 
 ## 本周关键指标
@@ -9,8 +9,8 @@
 | --- | --- |
 | 活跃资产（未发布/未归档） | 100 |
 | 阻塞项 | 0 |
-| 已逾期（目标日期 < 今天） | 85 |
-| 未来 14 天待交付 | 5 |
+| 已逾期（目标日期 < 今天） | 93 |
+| 未来 14 天待交付 | 6 |
 
 ## 活跃流程分布
 
@@ -84,14 +84,15 @@
 | [交易大师图鉴 14｜动量突破（Momentum Breakout）：真正伟大的进攻，不是教你追热点，而是教你只在强者获得“二次加速”时，才果断入场。](master_series/ms-14_momentum_breakout.md) | Growth | ✍️ 生产中 | 2026-03-25 周三 | cmo | - |
 | [交易大师图鉴 15｜多周期确认：真正的高手，不是看更多图，而是当大方向与小触发“吵架”时，敢于立刻停下来。](master_series/ms-15_multi_timeframe_confirmation.md) | Growth | ✍️ 生产中 | 2026-03-25 周三 | cmo | - |
 
-> 注：逾期任务共 85 条，仅展示最早到期的 50 条。
+> 注：逾期任务共 93 条，仅展示最早到期的 50 条。
 
 ## 未来 14 天交付窗口
 
 | 目标日期 | 标题 | 阶段 | Owner | Reviewer | 公众号状态 |
 | --- | --- | --- | --- | --- | --- |
-| 2026-04-17 周五 | [101-14: 越盯盘，越容易亏大钱：很多大跌，都是盯出来的](cn/101_academy/101-14_eod_edge.md) | 👀 待审核 | cmo | founder | 📝 草稿 |
-| 2026-04-22 周三 | [黑天鹅数学：你以为十年一遇，市场却隔三差五就教你做人](cn/101_academy/101-37_black_swan_math.md) | 👀 待审核 | cmo | founder | 📝 草稿 |
-| 2026-04-24 周五 | [101-70: AI 最危险的时候，不是它不聪明，而是你想冲时它也跟着你喊冲](cn/101_academy/101-70_ai_guardrails.md) | ✍️ 生产中 | cmo | founder | 📝 草稿 |
-| 2026-04-27 周一 | [101-32: 市场根本不在乎你亏了多少，只有你自己还在死守成本线](cn/101_academy/101-32_stateless_execution.md) | 👀 待审核 | cmo | founder | 📝 草稿 |
-| 2026-04-29 周三 | [投资模式：切换你的策略风格](../../5_Support_Ops/content/cn/investment-mode-config.md) | 👀 待审核 | cmo | founder | 📝 草稿 |
+| 2026-05-13 周三 | [模型层级划分：Pro 版与基础版 AI 引擎切流说明](../../5_Support_Ops/content/cn/model-tiers-diff.md) | 👀 待审核 | cmo | founder | 📝 草稿 |
+| 2026-05-15 周五 | [按需更新：好钢用在刀刃上](../../5_Support_Ops/content/cn/on-demand-sync.md) | 👀 待审核 | cmo | founder | 📝 草稿 |
+| 2026-05-18 周一 | [双轨制：前台生产线，后台实验线](../../5_Support_Ops/content/cn/dual-lane-architecture.md) | 👀 待审核 | cmo | founder | 📝 草稿 |
+| 2026-05-20 周三 | [极端容错解析：大波动时，ZISO 为什么不容易白屏？](../../5_Support_Ops/content/cn/smart-parser-ui.md) | ✍️ 生产中 | cmo | founder | 📝 草稿 |
+| 2026-05-22 周五 | [零过期协议：尽量不让你看到旧价格](../../5_Support_Ops/content/cn/zero-stale-guarantee.md) | ✍️ 生产中 | cmo | founder | 📝 草稿 |
+| 2026-05-25 周一 | [性能降级：省电也是战斗力](../../5_Support_Ops/content/cn/perf-adaptation.md) | ✍️ 生产中 | cmo | founder | 📝 草稿 |
