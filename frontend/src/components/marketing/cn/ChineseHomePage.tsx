@@ -10,6 +10,7 @@ import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlo
 import { JsonLd } from '@/components/seo/JsonLd';
 import { brandCoreZhCN } from '@/content/brand-core.zh-CN';
 import { ProductHuntBadge } from '../ProductHuntBadge';
+import { buildHomeSoftwareJsonLd } from '@/content/seo-home';
 
 export function ChineseHomePage() {
   const faqSchema = {
@@ -37,6 +38,7 @@ export function ChineseHomePage() {
 
   return (
     <PageShell currentPage="home">
+      <JsonLd data={buildHomeSoftwareJsonLd('cn')} />
       <JsonLd data={faqSchema} />
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40 flex flex-col items-center text-center">
         <div className="space-y-6 max-w-3xl mb-16">

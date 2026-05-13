@@ -7,6 +7,7 @@ import { PageShell, KO_BOUNDARY_NOTICE, KO_DEFAULT_SOURCES } from './KoLayout';
 import { GeoSummary, SourceBlock, BoundaryNotice } from '@/components/seo/GeoBlocks';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { FocusedImageSlider } from '../FocusedImageSlider';
+import { buildHomeSoftwareJsonLd } from '@/content/seo-home';
 
 export function KoreanHomePage() {
   const tacticalSlides = [
@@ -47,6 +48,7 @@ export function KoreanHomePage() {
 
   return (
     <PageShell currentPage="home">
+      <JsonLd data={buildHomeSoftwareJsonLd('ko')} />
       <JsonLd data={faqSchema} />
       <main className="relative z-10 max-w-7xl mx-auto px-8 pt-12 pb-40 flex flex-col items-center text-center">
         <div className="space-y-6 max-w-3xl mb-16">

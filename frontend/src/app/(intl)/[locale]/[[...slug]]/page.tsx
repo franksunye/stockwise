@@ -14,6 +14,7 @@ import { EnglishPricingPage } from '@/components/marketing/en/EnglishPricingPage
 import { EnglishPrivacyPage } from '@/components/marketing/en/EnglishPrivacyPage';
 import { EnglishRefundPage } from '@/components/marketing/en/EnglishRefundPage';
 import { EnglishTermsPage } from '@/components/marketing/en/EnglishTermsPage';
+import { homeSeoLocaleCopy, type HomeSeoLocale } from '@/content/seo-home';
 import { KoreanAboutPage } from '@/components/marketing/ko/KoreanAboutPage';
 import { KoreanHomePage } from '@/components/marketing/ko/KoreanHomePage';
 import { KoreanPricingPage } from '@/components/marketing/ko/KoreanPricingPage';
@@ -79,6 +80,7 @@ interface PageConfig {
   path: string;
   render: () => React.ReactNode;
   alternateLocales?: PublicLocale[];
+  keywords?: readonly string[];
 }
 
 function isContentPath(slugParts: string[]): boolean {
@@ -102,17 +104,23 @@ function buildLocalizedMeta(locale: Exclude<PublicLocale, 'cn' | 'en'>, page: 'h
   return metaLabels[locale][page];
 }
 
+function getHomeSeo(locale: HomeSeoLocale) {
+  return homeSeoLocaleCopy[locale];
+}
+
 function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | null {
   const path = slugParts.join('/');
 
   if (locale === 'cn') {
     if (path === '') {
+      const seo = getHomeSeo('cn');
       return {
-        title: '知守 AI | 让交易回归理性的从容',
-        description: '复杂的分析交给 AI，简单的决策留自己。知守 AI 为严肃零售投资者提供盘后复盘、数据建模与战术简报，助您跨越情绪波峰，建立稳健的交易纪律。',
+        title: seo.title,
+        description: seo.description,
         path: '/',
         render: () => <ChineseHomePage />,
         alternateLocales: ['en', 'cn', 'ko', 'es'],
+        keywords: seo.keywords,
       };
     }
 
@@ -211,13 +219,14 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
 
   if (locale === 'ko') {
     if (path === '') {
-      const meta = buildLocalizedMeta('ko', 'home');
+      const seo = getHomeSeo('ko');
       return {
-        title: meta.title,
-        description: meta.desc,
+        title: seo.title,
+        description: seo.description,
         path: '/',
         render: () => <KoreanHomePage />,
         alternateLocales: ['en', 'cn', 'ko', 'es'],
+        keywords: seo.keywords,
       };
     }
 
@@ -276,13 +285,14 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
 
   if (locale === 'es') {
     if (path === '') {
-      const meta = buildLocalizedMeta('es', 'home');
+      const seo = getHomeSeo('es');
       return {
-        title: meta.title,
-        description: meta.desc,
+        title: seo.title,
+        description: seo.description,
         path: '/',
         render: () => <SpanishHomePage />,
         alternateLocales: ['en', 'cn', 'ko', 'es'],
+        keywords: seo.keywords,
       };
     }
 
@@ -340,13 +350,14 @@ function getPageConfig(locale: PublicLocale, slugParts: string[]): PageConfig | 
   }
 
   if (path === '') {
-    const meta = locale === 'en' ? null : buildLocalizedMeta(locale, 'home');
+    const seo = getHomeSeo('en');
     return {
-      title: meta?.title || 'ZISO AI | DeepSeek-V3 Powered Stock Intelligence',
-      description: meta?.desc || 'Advanced market research, tactical briefings, and execution discipline powered by DeepSeek-V3. Built for serious retail investors seeking institutional-grade Alpha.',
+      title: seo.title,
+      description: seo.description,
       path: '/',
       render: () => <EnglishHomePage />,
       alternateLocales: ['en', 'cn', 'ko', 'es'],
+      keywords: seo.keywords,
     };
   }
 
@@ -424,7 +435,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: config.title,
     description: config.description,
     path: config.path,
-    keywords: core.keywords,
+    keywords: [...(config.keywords || core.keywords)],
     locale,
     index: true,
     alternateLocales: config.alternateLocales,
