@@ -16,5 +16,6 @@ export default function robots(): MetadataRoute.Robots {
       `${CANONICAL_ORIGIN}/sitemap.xml`,
       `${CANONICAL_ORIGIN}/sitemap-gsc.xml`,
     ],
+    host: CANONICAL_ORIGIN,
   };
 }

@@ -55,6 +55,21 @@ async function verifySitemap() {
   assert(invalid.length === 0, `sitemap.xml contains non-canonical locs: ${invalid.slice(0, 5).join(', ')}`);
 }
 
+async function verifyGscSitemap() {
+  const response = await fetch(`${SITE_URL}/sitemap-gsc.xml`);
+  const body = await response.text();
+  assert(response.status === 200, `sitemap-gsc.xml expected 200, got ${response.status}`);
+  assert(
+    response.headers.get('content-type')?.includes('application/xml'),
+    `sitemap-gsc.xml content-type mismatch: ${response.headers.get('content-type')}`
+  );
+
+  const locs = [...body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+  assert(locs.length > 0, 'sitemap-gsc.xml has no <loc> entries');
+  const invalid = locs.filter((loc) => !loc.startsWith(`${SITE_URL}/`) && loc !== SITE_URL);
+  assert(invalid.length === 0, `sitemap-gsc.xml contains non-canonical locs: ${invalid.slice(0, 5).join(', ')}`);
+}
+
 async function verifyAsset(pathname) {
   const response = await fetch(`${SITE_URL}${pathname}`);
   assert(response.status === 200, `${pathname} expected 200, got ${response.status}`);
@@ -86,6 +101,7 @@ async function main() {
 
   await verifyRobots();
   await verifySitemap();
+  await verifyGscSitemap();
   await verifyAsset('/llms.txt');
   await verifyAsset('/logo.png');
 
