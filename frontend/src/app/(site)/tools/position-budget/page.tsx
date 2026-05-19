@@ -30,6 +30,7 @@ import { getMarketBadge } from '@/lib/market-badge';
 import { useWatchlist } from '@/hooks/useWatchlist';
 import { StockSymbolSearchField } from '@/components/stock/StockSymbolSearchField';
 import { useStockSymbolSearch } from '@/hooks/useStockSymbolSearch';
+import { positionBudgetSupportArticles } from '@/content/seo-position-budget';
 import {
     fetchPositionBudgetPreferences,
     fetchPositionBudgetPriceHistory,
@@ -1342,6 +1343,8 @@ export default function PositionBudgetToolPage() {
                         </div>
                     )}
                 </section>
+
+                <PositionBudgetSeoGuide locale={locale} />
             </main>
 
             {/* Sticky action bar */}
@@ -1398,6 +1401,135 @@ function FieldNumber({
                 className="w-full bg-black/40 border border-white/5 rounded-xl px-3 py-2.5 mono text-sm focus:outline-none focus:border-indigo-500/50 focus:bg-black/60 transition-colors placeholder:text-slate-600"
             />
         </label>
+    );
+}
+
+function PositionBudgetSeoGuide({ locale }: { locale: AppLocale }) {
+    if (locale !== 'en') {
+        return (
+            <section id="position-budget-guide" className="border-t border-white/10 pt-10 sm:pt-12">
+                <div className="max-w-4xl space-y-8">
+                    <div className="space-y-3">
+                        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-indigo-300">
+                            仓位预算方法
+                        </p>
+                        <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                            先定单笔最大亏损，再计算可以买多少股。
+                        </h2>
+                        <p className="text-sm sm:text-base leading-7 text-slate-400">
+                            仓位预算不是预测股票会涨多少，而是在下单前把账户规模、单笔风险、入场价和止损价连成一条清晰规则。
+                            当每股风险变大，建议股数应自动变少；当止损更近，仓位才有条件放大。
+                        </p>
+                    </div>
+                    <div className="grid gap-5 md:grid-cols-3">
+                        <div>
+                            <h3 className="text-sm font-bold text-white">1. 单笔风险</h3>
+                            <p className="mt-2 text-sm leading-6 text-slate-500">
+                                先决定这笔交易最多亏账户的多少比例，例如 0.5%、1% 或 2%。
+                            </p>
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-white">2. 每股风险</h3>
+                            <p className="mt-2 text-sm leading-6 text-slate-500">
+                                每股风险等于入场价减去止损价，它决定风险预算可以换成多少股。
+                            </p>
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-white">3. R 倍数</h3>
+                            <p className="mt-2 text-sm leading-6 text-slate-500">
+                                目标价只用于检查风险收益比，不会改变止损口径，也不构成收益承诺。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+    }
+
+    return (
+        <section id="position-budget-guide" className="border-t border-white/10 pt-10 sm:pt-12">
+            <div className="max-w-4xl space-y-10">
+                <div className="space-y-3">
+                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-indigo-300">
+                        Position Sizing Method
+                    </p>
+                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                        Calculate how many shares to buy from risk per trade, not conviction.
+                    </h2>
+                    <p className="text-sm sm:text-base leading-7 text-slate-400">
+                        A stock position size calculator turns a trading idea into a risk budget. Start with account size
+                        and risk per trade, define entry and stop loss, then convert that risk into shares, expected
+                        loss, position value, and R multiple.
+                    </p>
+                </div>
+
+                <div className="grid gap-5 md:grid-cols-3">
+                    <div>
+                        <h3 className="text-sm font-bold text-white">Risk per trade</h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-500">
+                            Decide the account amount you are willing to lose if the stop is hit. This is the budget,
+                            not a forecast.
+                        </p>
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-bold text-white">Risk per share</h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-500">
+                            Subtract stop loss from entry price. A wider stop means fewer shares under the same risk
+                            budget.
+                        </p>
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-bold text-white">Shares and R multiple</h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-500">
+                            Review share count, expected loss, position value, and risk-reward ratio before the idea
+                            becomes an order.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
+                    <div>
+                        <h3 className="text-sm font-bold text-white">Common questions</h3>
+                        <dl className="mt-4 space-y-4">
+                            <div>
+                                <dt className="text-sm font-semibold text-slate-200">
+                                    How many shares should I buy?
+                                </dt>
+                                <dd className="mt-1 text-sm leading-6 text-slate-500">
+                                    Divide your risk budget by risk per share, then floor the result so the planned
+                                    loss stays inside the account limit.
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-sm font-semibold text-slate-200">
+                                    Is this a stop loss calculator?
+                                </dt>
+                                <dd className="mt-1 text-sm leading-6 text-slate-500">
+                                    It uses your stop loss to calculate stock position size. It does not choose the
+                                    perfect stop or guarantee a result.
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-bold text-white">Learn the workflow</h3>
+                        <ul className="mt-4 space-y-3">
+                            {positionBudgetSupportArticles.map((article) => (
+                                <li key={article.url}>
+                                    <Link
+                                        href={article.url}
+                                        className="text-sm font-semibold text-indigo-200 underline decoration-indigo-400/40 underline-offset-4 hover:text-white"
+                                    >
+                                        {article.name}
+                                    </Link>
+                                    <p className="mt-1 text-xs leading-5 text-slate-600">{article.about}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
     );
 }
 

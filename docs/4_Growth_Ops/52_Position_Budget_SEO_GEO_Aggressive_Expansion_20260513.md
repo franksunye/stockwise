@@ -4,7 +4,7 @@ doc_id: "growth-position-budget-seo-geo-aggressive-expansion-20260513"
 doc_domain: "growth_ops"
 doc_status: "active"
 owner: "cmo"
-last_reviewed_at: "2026-05-13"
+last_reviewed_at: "2026-05-19"
 summary: "把仓位预算插件的 SEO/GEO 从 5 个验证词扩展为分层关键词组合，并定义 14 天观测窗口内的 12 篇内容支撑矩阵。"
 source_docs:
   - "docs/3_Product/Specs/trade_management/57_Position_Budget_Plugin_P0_Spec_20260511.md"
@@ -191,3 +191,31 @@ Trends URL: https://trends.google.com/trends/explore?geo=US&q=position%20size%20
 3. 若 `stop loss calculator` 带来非交易污染：降级该词，只保留 `stock stop loss calculator` 和 `stop loss position size calculator`。
 4. 若西语需要扩展：先观察 `calculadora trading` / `calculadora de riesgo trading`；`lotaje` 不回到 metadata，除非未来产品明确支持 Forex lot sizing。
 5. 若支撑文章先起量：把对应文章作为内链入口，不急着让工具页吃所有词。
+
+## 9. D7 检查记录（2026-05-19）
+
+检查口径：Chrome 登录态打开 Google Analytics、Search Console、Google Trends；同时用 GA4 / GSC API 拉取可计算数据。当前日期距离本轮内容落地约 6 天，GSC 可用数据截止 2026-05-17。
+
+### 9.1 结果判断
+
+| 信号 | 结果 | 判断 |
+| --- | ---: | --- |
+| 技术 SEO | `check:position-budget-seo` 通过 | 页面、JSON-LD、sitemap、sitemap-gsc 链路正常 |
+| GSC `/tools/position-budget` 近 56 天 | 1 impression / 0 click / avg position 3 | 已被发现，但未形成可判断 query 分布 |
+| GSC 2026-05-13 至 2026-05-17 目标词簇 | 0 target page/query rows | D7 还没有自然搜索起量 |
+| GA4 `/tools/position-budget` 近 30 天 | 13 sessions / 3 active users / 49 views | 有使用，但来源不是 SEO 主导 |
+| GA4 来源 | direct 7 sessions；devhunt referral 6 sessions | 当前主要是直接访问和外部目录流量 |
+| GA4 D0 后 `/tools/position-budget` | 2 sessions / 2 active users / 1 page view | 内容落地后仍处于低量观察期 |
+| GA4 position 词簇 Learn 页近 30 天 | `what-is-position-size-calculator` 1 session；`calculate-stock-position-size-before-trade` 1 session | 支撑文章已可访问，但尚未贡献明显入口 |
+
+结论：**本轮 SEO/GEO 工作的技术基础有效，但搜索效果尚未生效。** 现在不应改掉 `position size calculator` 主假设，也不应扩到 Forex / crypto / options 等错配词；更实际的动作是增强工具页本体的可读正文、FAQ/HowTo 语义和与 Learn 支撑文章的关联。
+
+### 9.2 已执行优化
+
+1. `frontend/src/content/seo-position-budget.ts`：JSON-LD 从单个 `SoftwareApplication` 扩展为 `@graph`，新增 `FAQPage`、`HowTo`、`BreadcrumbList`，并把 4 篇 Learn 支撑文章作为 `subjectOf` 关联。
+2. `frontend/src/app/(site)/tools/position-budget/page.tsx`：在工具主体下方新增可读 SEO/GEO 内容区，覆盖 `risk per trade`、`risk per share`、`shares to buy`、`stop loss calculator`、`R multiple`，并加入通往支撑文章的站内链接。
+3. 验证：`npm run --prefix frontend check:position-budget-seo` 通过；`npm run --prefix frontend build` 通过；构建产物 HTML 中可检出 `FAQPage`、`HowTo`、`Risk per share`、`How many shares should I buy`、`Position Sizing Method`。
+
+### 9.3 下一次检查
+
+D14 继续看 2026-05-13 之后的 GSC query/page rows。若仍只有 0-1 impression，优先做索引推动与外链入口；若出现 `position size calculator` 展示但 CTR 低，再按 §8 改 description；若出现 `risk per share` / `risk per trade` / `shares to buy` 相关展示，则补强对应 FAQ 和内链锚文本。
