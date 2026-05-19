@@ -219,3 +219,39 @@ Trends URL: https://trends.google.com/trends/explore?geo=US&q=position%20size%20
 ### 9.3 下一次检查
 
 D14 继续看 2026-05-13 之后的 GSC query/page rows。若仍只有 0-1 impression，优先做索引推动与外链入口；若出现 `position size calculator` 展示但 CTR 低，再按 §8 改 description；若出现 `risk per share` / `risk per trade` / `shares to buy` 相关展示，则补强对应 FAQ 和内链锚文本。
+
+## 10. 索引推动记录与周期 SOP（2026-05-20）
+
+### 10.1 本次提交 URL
+
+| URL | Google Search Console | Bing / IndexNow |
+| --- | --- | --- |
+| `https://ziso.cc/tools/position-budget` | 已收录；已请求重新编入索引 | IndexNow 已提交 |
+| `https://ziso.cc/learn/what-is-position-size-calculator` | 已收录；重新提交确认不明确 | IndexNow 已提交 |
+| `https://ziso.cc/learn/calculate-stock-position-size-before-trade` | 未收录；已请求编入索引 | IndexNow 已提交 |
+| `https://ziso.cc/learn/risk-per-share-vs-risk-per-trade` | 未收录；已请求编入索引 | IndexNow 已提交 |
+| `https://ziso.cc/learn/stop-loss-position-size-calculator` | 未收录；已请求编入索引 | IndexNow 已提交 |
+
+### 10.2 Bing 侧状态
+
+1. 通过 Chrome 登录 Bing Webmaster Tools。
+2. 从 Google Search Console 导入 `https://ziso.cc/`，只导入本站，未导入同账号其他站点。
+3. Bing 识别到 `ziso.cc/` 下已有 2 个 sitemap。
+4. 使用 IndexNow API 提交上述 5 个 URL，返回 `HTTP 200`。
+5. Bing IndexNow 页面确认：`URLs submitted in last 15 hours = 5`，5 个 URL 均显示 `Today at 23:53 / Self`。
+
+### 10.3 周期执行 SOP
+
+每次仓位预算 SEO/GEO 迭代后按以下顺序执行：
+
+1. 跑技术检查：`npm run --prefix frontend check:position-budget-seo`。
+2. 确认目标 URL 在 `https://ziso.cc/sitemap.xml` 与 `https://ziso.cc/sitemap-gsc.xml` 中存在。
+3. Chrome 打开 Google Search Console，使用 URL Inspection 对核心 URL 执行“请求编入索引”。若页面已收录，也按“内容已更新”请求重新抓取。
+4. Chrome 打开 Bing Webmaster Tools，确认站点为 `ziso.cc/`；若 Bing 未导入本站，先从 GSC 导入，只选择 `https://ziso.cc/`。
+5. 使用 IndexNow 提交本轮 URL，并在 Bing IndexNow 页面确认 `URLs submitted in last 15 hours` 和提交列表。
+6. 记录每个 URL 的 Google 状态：`已收录 / 未收录 / 已抓取未编入索引 / Google 无法识别此网址 / 请求确认不明确`。
+7. D7 看索引与异常；D14 看 GSC/Bing query、page、country、CTR 与 position，不因 D7 无点击就改主词。
+
+### 10.4 当前风险提示
+
+GSC 对部分新增 Learn URL 显示“未检测到任何引荐站点地图”或“Google 无法识别此网址”，但生产 `sitemap.xml` / `sitemap-gsc.xml` 已包含这些 URL。这更像是 GSC 数据刷新滞后，而不是 sitemap 生成失败。D7/D14 检查时优先看该状态是否变成“已抓取 - 尚未编入索引”或“网页已编入索引”。
