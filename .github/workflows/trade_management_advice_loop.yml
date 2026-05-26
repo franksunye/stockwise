@@ -85,18 +85,18 @@ jobs:
           SYMBOL_INPUT: ${{ inputs.symbol || '' }}
           NOTIFY_INPUT: ${{ inputs.notify }}
         run: |
-          ARGS="--persist-log --fail-on-errors --market CN"
+          ARGS=(--persist-log --fail-on-errors --market CN)
           if [ -n "$USER_ID_INPUT" ]; then
-            ARGS="$ARGS --user-id $USER_ID_INPUT"
+            ARGS+=(--user-id "$USER_ID_INPUT")
           fi
           if [ -n "$SYMBOL_INPUT" ]; then
-            ARGS="$ARGS --symbol $SYMBOL_INPUT"
+            ARGS+=(--symbol "$SYMBOL_INPUT")
           fi
           if [ "$NOTIFY_INPUT" = "true" ]; then
-            ARGS="$ARGS --notify"
+            ARGS+=(--notify)
           fi
 
-          python -u backend/scripts/run_trade_management_advice_loop.py $ARGS
+          python -u backend/scripts/run_trade_management_advice_loop.py "${ARGS[@]}"
 
   advice-hk:
     needs: [gate-hk]
@@ -129,18 +129,18 @@ jobs:
           SYMBOL_INPUT: ${{ inputs.symbol || '' }}
           NOTIFY_INPUT: ${{ inputs.notify }}
         run: |
-          ARGS="--persist-log --fail-on-errors --market HK"
+          ARGS=(--persist-log --fail-on-errors --market HK)
           if [ -n "$USER_ID_INPUT" ]; then
-            ARGS="$ARGS --user-id $USER_ID_INPUT"
+            ARGS+=(--user-id "$USER_ID_INPUT")
           fi
           if [ -n "$SYMBOL_INPUT" ]; then
-            ARGS="$ARGS --symbol $SYMBOL_INPUT"
+            ARGS+=(--symbol "$SYMBOL_INPUT")
           fi
           if [ "$NOTIFY_INPUT" = "true" ]; then
-            ARGS="$ARGS --notify"
+            ARGS+=(--notify)
           fi
 
-          python -u backend/scripts/run_trade_management_advice_loop.py $ARGS
+          python -u backend/scripts/run_trade_management_advice_loop.py "${ARGS[@]}"
 
   notify-failure:
     needs: [gate-cn, gate-hk, advice-cn, advice-hk]
