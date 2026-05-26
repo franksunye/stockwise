@@ -3,12 +3,12 @@
  * 
  * 这个 Cloudflare Worker 作为精准调度器，支持：
  * 1. 每个工作日 20:30 精确触发 trade_management_advice_loop.yml
- * 2. 每 15 分钟检查一次早报与交易时段内的 realtime sync
+ * 2. 每 5 分钟检查一次早报与交易时段内的 realtime sync
  */
 
 /**
  * JOB_REGISTRY: 核心任务注册表 (BJT)
- * 仅在每 15 分钟 (xx:00, xx:15, xx:30, xx:45) 的心跳时刻执行精确匹配
+ * 仅在每 5 分钟 (xx:00, xx:05, …, xx:55) 的心跳时刻执行精确匹配
  */
 const JOB_REGISTRY = [
   {
@@ -71,7 +71,7 @@ function getUSEasternContext(now = new Date()) {
 }
 
 export default {
-  // Cron Trigger 入口 (已配置为每 15 分钟触发一次)
+  // Cron Trigger 入口 (已配置为每 5 分钟触发一次)
   async scheduled(event, env, ctx) {
     console.log(`⏰ Heartbeat triggered at ${new Date().toISOString()}`);
 
@@ -82,14 +82,14 @@ export default {
     console.log(`🕙 Beijing Time: ${String(beijingHour).padStart(2, '0')}:${String(beijingMinute).padStart(2, '0')} (Day: ${beijingDay})`);
     console.log(`🗽 US Eastern Time: ${et.toISOString().replace('T', ' ').substring(0, 19)} (Day: ${etDay})`);
 
-    // 2. 精确任务匹配 (Precision Hits) - 增加 5 分钟容错窗口，防止分钟级漂移
+    // 2. 精确任务匹配 (Precision Hits) - 2 分钟容错，避免 5 分钟心跳重复触发
     const hits = JOB_REGISTRY.filter((job) => {
       const jobMinutesTotal = job.hour * 60 + job.minute;
       let diff = Math.abs(beijingMinutesTotal - jobMinutesTotal);
       // 处理跨天边界 (e.g., 23:59 匹配 00:00)
       if (diff > 720) diff = 1440 - diff;
       
-      const timeMatch = diff <= 5;
+      const timeMatch = diff <= 2;
       const dayMatch = !job.days || job.days.includes(beijingDay);
       return timeMatch && dayMatch;
     });

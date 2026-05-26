@@ -517,7 +517,7 @@ Production 内部分为两组：
 | `data_sync_cn.yml` | Post-Close | ingestion | Workflow Call / Manual | `trading_day_gate(CN)` | hard_blocking | A 股正式同步 |
 | `data_sync_hk.yml` | Post-Close | ingestion | Workflow Call / Manual | `trading_day_gate(HK)` | hard_blocking | 港股正式同步 |
 | `data_sync_us.yml` | Post-Close (US) | ingestion | Workflow Call / Manual | `trading_day_gate(US)` | hard_blocking | 美股正式同步（独立链） |
-| `data_sync_realtime.yml` | Intraday | ingestion | Cloudflare Worker (15min Grid) | 策略时段 (15min/次) | soft_blocking | 覆盖全球市场 (CN/HK/US) 实时行情与雷达监控 |
+| `data_sync_realtime.yml` | Intraday | ingestion | Cloudflare Worker (5min Grid) | 策略时段 (5min/次) | soft_blocking | 覆盖全球市场 (CN/HK/US) 实时行情与雷达监控 |
 | `data_sync_single.yml` | Manual / Backfill | ingestion | Manual / API Dispatch | 手工触发 | manual_only | 默认只做前端最小可展示补数；周期补数为可选扩展 |
 | `verify_predictions.yml` | Post-Close | production_validation | Workflow Call / Manual | `data_sync_*` | soft_blocking | 用户可见验证结果，属于生产口径 |
 | `ai_analyze_cn.yml` | Post-Close | analysis | Workflow Call / Manual | `data_sync_cn` | soft_blocking | 纯分析 workflow；内部仍会触发 `mode_pipeline`；扩容细节见工程 RFC 47 |
@@ -530,11 +530,11 @@ Production 内部分为两组：
 | Job / Workflow | Stage | Type | Trigger Source | Depends On | Blocking | 备注 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `almanac_generator.py` | Post-Close / Pre-Market | market_content | Workflow / Program Entry | `data_sync_cn` 或已有事实表 | best_effort | T+1 黄历生产 |
-| `daily_morning_call.yml` | Pre-Market (CN/HK) | distribution | Cloudflare Worker (15min Grid) | 08:30 BJT 触发 | best_effort | 盘前 ritual |
-| `daily_morning_call_us.yml` | Pre-Market (US) | distribution | Cloudflare Worker (15min Grid) | 20:30 BJT 触发 | best_effort | 美股盘前 ritual |
+| `daily_morning_call.yml` | Pre-Market (CN/HK) | distribution | Cloudflare Worker (5min Grid) | 08:30 BJT 触发 | best_effort | 盘前 ritual |
+| `daily_morning_call_us.yml` | Pre-Market (US) | distribution | Cloudflare Worker (5min Grid) | 20:30 BJT 触发 | best_effort | 美股盘前 ritual |
 | `daily_brief_push.yml` | Post-Close | distribution | GitHub Schedule / Manual | brief source 数据 | - | **[已停用]** 国际版暂不提供 |
 | `daily_validation_check.yml` | Post-Close | distribution | GitHub Schedule / Manual | 生产链验证结果 | best_effort | 中港验证战报 |
-| `daily_validation_check_us.yml`| Post-Close (US) | distribution | Cloudflare Worker (15min Grid) | 08:30 BJT 触发 | best_effort | 美股验证战报 (已对齐 15min 格点) |
+| `daily_validation_check_us.yml`| Post-Close (US) | distribution | Cloudflare Worker (5min Grid) | 08:30 BJT 触发 | best_effort | 美股验证战报 (已对齐 5min 格点) |
 | `broadcast_almanac.py` | Post-Close / Pre-Market | distribution | Workflow / Program Entry | 已生成黄历 | best_effort | 只负责广播，不应重算 |
 
 ### 6.2 Research
@@ -678,9 +678,9 @@ Production 内部分为两组：
 | 17:30 | Ops Governance / Production Content | `daily_validation_check.yml` | 巡检与摘要（`daily_brief_push` 已停用） |
 | 06:30 | Production Core | `daily_pipeline_us.yml` (US Main Chain) | 美股独立盘后主流水线，完成数据同步、AI 预测与结算 |
 | 08:30 | Production Content | `daily_morning_call.yml` | 中国市场早报推送 (CN/HK) —— 由 Worker 驱动 |
-| 08:30 | Production Content | `daily_validation_check_us.yml` | 美股验证战报 (US Validation Glory) —— 已对齐 15min 格点 |
+| 08:30 | Production Content | `daily_validation_check_us.yml` | 美股验证战报 (US Validation Glory) —— 已对齐 5min 格点 |
 | 20:30 | Production Content | `daily_morning_call_us.yml` | 美股早报推送 (US Morning Call) —— 由 Worker 驱动 |
-| 21:30-05:00 | Production Core | `data_sync_realtime.yml` (US) | 美股盘中实时链，由 Cloudflare Worker 15min 心跳驱动 |
+| 21:30-05:00 | Production Core | `data_sync_realtime.yml` (US) | 美股盘中实时链，由 Cloudflare Worker 5min 心跳驱动 |
 
 ### 8.2 每日 Research
 

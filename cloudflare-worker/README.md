@@ -27,7 +27,7 @@ GitHub Actions executes the Python ETL script
 
 ## ⏰ Scheduling Rules
 
-The Worker uses a mix of exact cron triggers and a `15`-minute polling trigger:
+The Worker uses a mix of exact cron triggers and a `5`-minute polling trigger:
 
 | Beijing Time Window | Workflow | Trigger Type |
 | --- | --- | --- |
@@ -132,7 +132,7 @@ curl https://stockwise-scheduler.<your-subdomain>.workers.dev/trigger
 **Completely Free**!
 
 - Free Tier: 100,000 requests per day.
-- Your Usage: very low relative to free tier, because the Worker runs every 15 minutes and usually skips outside target windows.
+- Your Usage: very low relative to free tier, because the Worker runs every 5 minutes and usually skips outside target windows.
 - Utilization Rate: negligible for current workload.
 
 ## 📊 Monitoring

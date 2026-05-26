@@ -2,7 +2,7 @@ name: StockWise Realtime Sync
 
 on:
   # Trigger Source: Cloudflare Worker Only (Global Realtime Sweep)
-  # 调度由 Cloudflare Worker 全权负责 (15min 间隔)
+  # 调度由 Cloudflare Worker 全权负责 (5min 间隔)
   workflow_dispatch: # 由 Cloudflare Worker 或手动触发
     inputs:
       market:

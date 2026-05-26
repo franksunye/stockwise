@@ -47,7 +47,7 @@ The canonical trigger times (BJT) are defined in `cloudflare-worker/worker.js`:
 - **Morning Call**: 08:30
 - **CN Daily**: 16:00
 - **HK Daily**: 16:30
-- **Realtime Sync**: Every 15m (during trading windows).
+- **Realtime Sync**: Every 5m (during trading windows).
 
 ### 2.2 Deployment SOP
 When modifying the scheduler or triggers:
