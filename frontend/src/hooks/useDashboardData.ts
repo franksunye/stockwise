@@ -12,8 +12,8 @@ import { WatchlistItem } from './useWatchlist';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { getDashboardCacheStorageKey } from '@/lib/dashboard-bootstrap';
 
-// 价格层刷新间隔：盘中 1 分钟，非交易时段 10 分钟
-const TRADING_PRICE_REFRESH_INTERVAL = 1 * 60 * 1000;
+// 价格层刷新间隔：盘中 30 秒，非交易时段 10 分钟
+const TRADING_PRICE_REFRESH_INTERVAL = 30 * 1000;
 const DEFAULT_PRICE_REFRESH_INTERVAL = 10 * 60 * 1000;
 const BROADCAST_FAILURE_THRESHOLD = 3;
 const BROADCAST_CIRCUIT_BREAKER_MS = 5 * 60 * 1000;

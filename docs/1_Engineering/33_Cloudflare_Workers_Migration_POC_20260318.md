@@ -335,7 +335,7 @@ Cloudflare Workers 费用细节来源：[`workers.cloudflare.com/pricing`](https
 - **2026-03-19** — Broadcast Phase-1 在 Vercel 生产链路上线：
   - 新增 `GET /api/stock/prices/all`（支持 `market=all|hk|cn`）。
   - 广播缓存策略：`Cache-Control: public, s-maxage=30, stale-while-revalidate=30`；服务端查询层 `revalidate: 30`。
-  - 前端价格刷新主路径切换到广播端点，盘中刷新 1 分钟，非交易时段 10 分钟。
+  - 前端价格刷新主路径切换到广播端点，盘中刷新 30 秒，非交易时段 10 分钟。
   - 生产容错：广播连续失败触发熔断，自动回退 legacy `/api/stock/prices`，冷却后自动恢复探测。
 - **2026-03-19** — `global_stock_pool` 一致性修复与线上清理完成：
   - 修复 `stock-pool` add/delete 的计数幂等问题，并在 `watchers_count <= 0` 时移除 symbol。
