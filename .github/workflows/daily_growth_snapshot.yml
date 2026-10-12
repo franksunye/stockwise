@@ -1,9 +1,10 @@
 name: Daily Growth Snapshot
 
 on:
-  schedule:
-    # 07:00 Asia/Shanghai. GA4/Clarity are less stable before this window.
-    - cron: '0 23 * * *'
+  # Schedule paused on 2026-10-12 while the ZISO project is dormant.
+  # schedule:
+  #     # 07:00 Asia/Shanghai. GA4/Clarity are less stable before this window.
+  #     - cron: '0 23 * * *'
   workflow_dispatch:
 
 jobs:

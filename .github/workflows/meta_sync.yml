@@ -1,9 +1,10 @@
 name: Daily Stock Metadata Sync
 
 on:
-  schedule:
-    # 每日北京时间 06:00 (UTC 22:00 前一天) 执行
-    - cron: '0 22 * * *'
+  # Schedule paused on 2026-10-12 while the ZISO project is dormant.
+  # schedule:
+  #     # 每日北京时间 06:00 (UTC 22:00 前一天) 执行
+  #     - cron: '0 22 * * *'
   workflow_dispatch: # 支持手动触发
 
 jobs:

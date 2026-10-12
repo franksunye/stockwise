@@ -1,8 +1,9 @@
 name: Tradeability Sidecar Weekly Calibration
 
 on:
-  schedule:
-    - cron: '0 2 * * 0' # Sunday 02:00 UTC
+  # Schedule paused on 2026-10-12 while the ZISO project is dormant.
+  # schedule:
+  #     - cron: '0 2 * * 0' # Sunday 02:00 UTC
   workflow_dispatch:
     inputs:
       market:

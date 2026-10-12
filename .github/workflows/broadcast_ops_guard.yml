@@ -1,9 +1,10 @@
 name: Broadcast Ops Guard
 
 on:
-  schedule:
-    # every 15 minutes
-    - cron: "*/15 * * * *"
+  # Schedule paused on 2026-10-12 while the ZISO project is dormant.
+  # schedule:
+  #     # every 15 minutes
+  #     - cron: "*/15 * * * *"
   workflow_dispatch:
 
 jobs:

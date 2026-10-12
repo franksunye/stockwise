@@ -5,8 +5,9 @@ name: Daily Validation Glory Push - CN/HK (Smart)
 # 安全：通过 Trading Day Gate 闸门确保仅在交易日执行
 
 on:
-  schedule:
-    - cron: '30 9 * * 1-5'  # 09:30 UTC = 17:30 CST
+  # Schedule paused on 2026-10-12 while the ZISO project is dormant.
+  # schedule:
+  #     - cron: '30 9 * * 1-5'  # 09:30 UTC = 17:30 CST
   workflow_dispatch:
     inputs:
       run_verify:

@@ -4,9 +4,10 @@ name: Technical SEO Monitor (Position Budget)
 # Hits production HTML + sitemap; fails the job when assertions break.
 
 on:
-  schedule:
-    # ~09:00 Asia/Shanghai — daily regression guard on live HTML / sitemap
-    - cron: '0 1 * * *'
+  # Schedule paused on 2026-10-12 while the ZISO project is dormant.
+  # schedule:
+  #     # ~09:00 Asia/Shanghai — daily regression guard on live HTML / sitemap
+  #     - cron: '0 1 * * *'
   workflow_dispatch:
   push:
     branches:

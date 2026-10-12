@@ -1,8 +1,9 @@
 name: Layer1 Consistency Daily
 
 on:
-  schedule:
-    - cron: "40 10 * * 1-5"
+  # Schedule paused on 2026-10-12 while the ZISO project is dormant.
+  # schedule:
+  #     - cron: "40 10 * * 1-5"
   workflow_dispatch:
     inputs:
       date:

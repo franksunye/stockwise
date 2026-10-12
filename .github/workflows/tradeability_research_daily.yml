@@ -1,8 +1,9 @@
 name: Tradeability Research Daily
 
 on:
-  schedule:
-    - cron: '40 16 * * 1-5' # 00:40 Asia/Shanghai, Tue-Sat
+  # Schedule paused on 2026-10-12 while the ZISO project is dormant.
+  # schedule:
+  #     - cron: '40 16 * * 1-5' # 00:40 Asia/Shanghai, Tue-Sat
   workflow_dispatch:
     inputs:
       market:

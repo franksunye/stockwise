@@ -1,8 +1,9 @@
 name: Acceptance Weekly Snapshot
 
 on:
-  schedule:
-    - cron: "10 2 * * 0"
+  # Schedule paused on 2026-10-12 while the ZISO project is dormant.
+  # schedule:
+  #     - cron: "10 2 * * 0"
   workflow_dispatch:
     inputs:
       week_end:

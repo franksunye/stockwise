@@ -1,8 +1,9 @@
 name: Tradeability Research Weekly Calibration
 
 on:
-  schedule:
-    - cron: '30 19 * * 6' # 03:30 Asia/Shanghai, Sunday
+  # Schedule paused on 2026-10-12 while the ZISO project is dormant.
+  # schedule:
+  #     - cron: '30 19 * * 6' # 03:30 Asia/Shanghai, Sunday
   workflow_dispatch:
     inputs:
       market:

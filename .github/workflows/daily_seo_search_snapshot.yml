@@ -1,9 +1,10 @@
 name: Daily SEO Search Snapshot
 
 on:
-  schedule:
-    # ~07:35 Asia/Shanghai · after Daily Growth Snapshot (cron 23:00 UTC)
-    - cron: '35 23 * * *'
+  # Schedule paused on 2026-10-12 while the ZISO project is dormant.
+  # schedule:
+  #     # ~07:35 Asia/Shanghai · after Daily Growth Snapshot (cron 23:00 UTC)
+  #     - cron: '35 23 * * *'
   workflow_dispatch:
 
 jobs:
